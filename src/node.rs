@@ -476,6 +476,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             Node::Leaf(..) => {
                 // unsafe: self has been match'd as leaf.
                 match nybble_mismatch(unsafe { self.unwrap_leaf_ref() }.key_slice(), key.borrow()) {
+                    // 若两 key 相同，则直接替换
                     None => Some(mem::replace(
                         &mut unsafe { self.unwrap_leaf_mut() }.val,
                         val,
