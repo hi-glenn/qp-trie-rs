@@ -43,16 +43,23 @@ pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
 
         if difference != 0 {
             if difference & 0x0F == 0 {
+                // 左 4 不同，右 4 相同；
+                // 奇数
                 return Some(1 + i * 2);
             } else {
+                // 左 4 相同，右 4 不同；
+                // 左 4 不同，右 4 不同；
+                // 偶数
                 return Some(i * 2);
             }
         }
     }
 
     if left.len() == right.len() {
+        // 两 key 相同
         None
     } else {
+        // abc 与 abcd ；返回 d 第一个半字节的索引
         Some(cmp::min(left.len(), right.len()) * 2)
     }
 }
