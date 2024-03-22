@@ -481,7 +481,9 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                         &mut unsafe { self.unwrap_leaf_mut() }.val,
                         val,
                     )),
+                    // 若两 key 不同
                     Some(mismatch) => {
+                        // self 从 Branch 变为了 Leaf
                         let node = mem::replace(self, Node::Branch(Branch::new(mismatch)));
 
                         // unsafe: self was match'd as a leaf, and node is self moved out.
@@ -490,7 +492,10 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                         // unsafe: self has just been replaced with a branch.
                         let branch = unsafe { self.unwrap_branch_mut() };
 
+                        // 插入 新 leaf
                         branch.insert_leaf(Leaf::new(key, val));
+                        
+                        // 插入 老 leaf
                         branch.insert_leaf(leaf);
 
                         None
