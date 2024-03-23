@@ -433,11 +433,14 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         key: K,
         val: V,
     ) -> &mut V {
+        // node 为 old branch/leaf
+        // self 从 old branch/leaf 变为 new branch
         let node = mem::replace(self, Node::Branch(Branch::new(graft)));
         let graft_branch = match node {
             Node::Leaf(leaf) => {
                 // unsafe: we've just replaced self with a branch.
                 let graft_branch = unsafe { self.unwrap_branch_mut() };
+                // 插入 old leaf
                 graft_branch.insert_leaf(leaf);
                 graft_branch
             }
@@ -445,6 +448,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 if branch.choice <= graft {
                     *self = Node::Branch(branch);
                     if let Node::Branch(ref mut branch) = *self {
+                        // index 为 diff nybble byte
                         let index = branch.index(key.borrow());
 
                         return if branch.has_entry(index) {
@@ -455,6 +459,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                                 val,
                             )
                         } else {
+                            // 插入 new leaf
                             &mut branch.insert_leaf(Leaf::new(key, val)).val
                         };
                     }
@@ -467,6 +472,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             }
         };
 
+        // 插入 new leaf
         &mut graft_branch.insert_leaf(Leaf::new(key, val)).val
     }
 
@@ -483,7 +489,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                     )),
                     // 若两 key 不同
                     Some(mismatch) => {
-                        // self 从 Branch 变为了 Leaf
+                        // self 从 Leaf 变为了 Branch
+                        // node 为 旧 Leaf
                         let node = mem::replace(self, Node::Branch(Branch::new(mismatch)));
 
                         // unsafe: self was match'd as a leaf, and node is self moved out.
