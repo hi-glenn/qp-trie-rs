@@ -9,7 +9,7 @@ use unreachable::UncheckedOptionExt;
 // array. This special exception is the "head".
 #[derive(Clone, PartialEq, Eq)]
 pub struct Sparse<T> {
-    index: u32,
+    index: u32, // bitmap
     entries: Vec<T>,
 }
 

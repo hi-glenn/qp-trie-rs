@@ -4,6 +4,7 @@ use core::cmp;
 //
 // This is `1 + b` where `b` is the `n`th nybble, unless the given slice has less than `n / 2`
 // elements, in which case `0` is returned.
+// return diff nybble byte
 #[inline]
 pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
     let byte_idx = n / 2;

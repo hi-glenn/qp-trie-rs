@@ -37,7 +37,7 @@ impl<K: Borrow<[u8]>, V> Leaf<K, V> {
 pub struct Branch<K, V> {
     // The nybble that this `Branch` cares about. Entries in the `entries` sparse array correspond
     // to different values of the nybble at the choice point for given keys.
-    choice: usize,
+    choice: usize, // diff nybble index
     entries: Sparse<Node<K, V>>,
 }
 
@@ -494,7 +494,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
 
                         // 插入 新 leaf
                         branch.insert_leaf(Leaf::new(key, val));
-                        
+
                         // 插入 老 leaf
                         branch.insert_leaf(leaf);
 
