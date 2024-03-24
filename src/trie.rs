@@ -234,6 +234,28 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
+   /// Get an immutable reference to the value associated with a given key, if it is in the tree.
+   pub fn get_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+   where
+       K: Borrow<Q>,
+       Q: Borrow<[u8]>,
+   {
+
+           match self.root.as_ref() {
+            Some(root) => {
+                let exemplar = root.get_exemplar(key.borrow());
+
+                // match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
+                //     Some(i) => exemplar.key.find_break(i / 2),
+                //     None => exemplar.key.borrow(),
+                // }
+
+                Some(&exemplar.val)
+            }
+            None => None,
+        }
+   }
+
     /// Get the longest common prefix of all the nodes in the trie and the given key.
     pub fn longest_common_prefix<'a, Q: ?Sized>(&'a self, key: &Q) -> &'a K::Split
     where
