@@ -1,3 +1,7 @@
+```bash
+cg run --example my_test
+```
+
 [![Build Status](https://travis-ci.org/sdleffler/qp-trie-rs.svg?branch=master)](https://travis-ci.org/sdleffler/qp-trie-rs)
 [![Docs Status](https://docs.rs/qp-trie/badge.svg)](https://docs.rs/qp-trie)
 [![On crates.io](https://img.shields.io/crates/v/qp-trie.svg)](https://crates.io/crates/qp-trie)
