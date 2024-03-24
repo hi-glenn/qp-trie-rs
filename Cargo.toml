@@ -21,6 +21,8 @@ license = "MPL-2.0"
 travis-ci = { repository = "sdleffler/qp-trie-rs", branch = "master" }
 
 [dependencies]
+libc = "0.2.153"
+libc-print = "0.1.22"
 new_debug_unreachable = "1.0.1"
 serde = { version = "1.0.11", optional = true, features = ["derive"] }
 unreachable = "1.0.0"

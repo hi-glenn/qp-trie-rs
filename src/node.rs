@@ -148,6 +148,8 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Convenience method for inserting a leaf into the branch's sparse array.
     #[inline]
     pub fn insert_leaf(&mut self, leaf: Leaf<K, V>) -> &mut Leaf<K, V> {
+        libc_print::libc_println!("insert_leaf");
+
         let node_mut = self.entries.insert(
             nybble_index(self.choice, leaf.key_slice()),
             Node::Leaf(leaf),
@@ -284,7 +286,17 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             Node::Leaf(ref leaf) if leaf.key_slice() == key => Some(leaf),
             Node::Leaf(..) => None,
 
-            Node::Branch(ref branch) => branch.get(key),
+            Node::Branch(ref branch) => {
+                if branch.entries.entries.len() > 0 {
+                    // let d1 = unsafe { &branch.entries.entries[0].unwrap_leaf().val };
+                    // libc_print::libc_println!("branch.entries.len: {:?}; ",  } );
+                }
+                
+                libc_print::libc_println!("branch.entries.len: {:?};", branch.entries.entries.len());
+
+                branch.get(key)
+            
+            },
         }
     }
 

@@ -1,10 +1,13 @@
 #![no_std]
 
 extern crate alloc;
+extern crate libc;
+
 
 #[macro_use]
 extern crate debug_unreachable;
 extern crate unreachable;
+extern crate libc_print;
 
 #[cfg(feature = "serde")]
 #[macro_use]

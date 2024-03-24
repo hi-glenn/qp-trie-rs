@@ -11,6 +11,8 @@ use subtrie::SubTrie;
 use util::nybble_mismatch;
 use wrapper::{BStr, BString};
 
+use libc_print::libc_println;
+
 /// A QP-trie. QP stands for - depending on who you ask - either "quelques-bits popcount" or
 /// "quad-bit popcount". In any case, the fact of the matter is that this is a compressed radix
 /// trie with a branching factor of 16. It acts as a key-value map where the keys are any value
@@ -250,6 +252,12 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 //     None => exemplar.key.borrow(),
                 // }
 
+                // exemplar.key.len()
+                // -----------
+                libc_println!("Hello {:?}!", 789);
+                
+                // --------
+
                 Some(&exemplar.val)
             }
             None => None,
@@ -294,6 +302,17 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
     pub fn get<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        self.root
+            .as_ref()
+            .and_then(|node| node.get(key.borrow()))
+            .map(|leaf| &leaf.val)
+    }
+
+    pub fn get_fake<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,

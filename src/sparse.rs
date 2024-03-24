@@ -10,7 +10,7 @@ use unreachable::UncheckedOptionExt;
 #[derive(Clone, PartialEq, Eq)]
 pub struct Sparse<T> {
     index: u32, // bitmap
-    entries: Vec<T>,
+pub    entries: Vec<T>,
 }
 
 impl<T: fmt::Debug> fmt::Debug for Sparse<T> {
@@ -97,10 +97,19 @@ impl<T> Sparse<T> {
 
     // Assuming that the array does not already contain an element for this index, insert the
     // given element.
+    // idx 为 diff nybble byte
     #[inline]
     pub fn insert(&mut self, idx: u8, elt: T) -> &mut T {
         debug_assert!(!self.contains(idx));
         let i = self.actual(idx);
+
+        libc_print::libc_println!("insert sparce index: {:?}; index: {:b};", i, self.index);
+
+        // match elt. {
+        //     crate::node::Node::Leaf(..) =>{},
+        //     crate::node::Node::Branch(..) =>{},
+        // }
+
         self.index |= 1 << idx;
         self.entries.insert(i, elt);
         &mut self.entries[i]
