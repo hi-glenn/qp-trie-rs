@@ -234,6 +234,10 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Node<K, V> {
     }
 }
 
+fn convert<T: Into<u32>>(value: T) -> u32 {
+    value.into()
+}
+
 impl<K: Borrow<[u8]>, V> Node<K, V> {
     // The following `unwrap_` functions are used for (at times) efficiently circumventing the
     // borrowchecker. All of them use `debug_unreachable!` internally, which means that in release,
@@ -287,15 +291,21 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             Node::Leaf(..) => None,
 
             Node::Branch(ref branch) => {
-                if branch.entries.entries.len() > 0 {
-                    // let d1 = unsafe { &branch.entries.entries[0].unwrap_leaf().val };
-                    // libc_print::libc_println!("branch.entries.len: {:?}; ",  } );
-                }
-                
                 libc_print::libc_println!("branch.entries.len: {:?};", branch.entries.entries.len());
 
+                if branch.entries.entries.len() == 3 {
+                    // let d1 = unsafe { branch.entries.entries[0].unwrap_leaf().val as u32};
+                    // libc_print::libc_println!("branch.entries.len: {:?}; ",  } );
+                    // Some(unsafe { branch.entries.entries[0].unwrap_leaf_ref() })
+                } else {
+                    // branch.get(key)
+                }
+                
+                
+
+                // Some(unsafe { branch.entries.entries[0].unwrap_leaf_ref() })
+
                 branch.get(key)
-            
             },
         }
     }
