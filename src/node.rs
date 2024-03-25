@@ -54,6 +54,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Create an empty `Branch` with the given choice point.
     #[inline]
     pub fn new(choice: usize) -> Branch<K, V> {
+        libc_print::libc_println!("new branch => choice: {:?}", choice);
         Branch {
             choice,
             entries: Sparse::new(),
@@ -524,7 +525,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                         // 插入 新 leaf
                         branch.insert_leaf(Leaf::new(key, val));
 
-                        // 插入 老 leaf
+                        // 插入 旧 leaf
                         branch.insert_leaf(leaf);
 
                         None

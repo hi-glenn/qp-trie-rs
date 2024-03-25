@@ -40,20 +40,28 @@ pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
     let mut difference;
 
     for (i, (l, r)) in left.iter().cloned().zip(right.iter().cloned()).enumerate() {
-        difference = l ^ r;
+        difference = l ^ r;  // 比较有 4 种结果
 
         if difference != 0 {
             if difference & 0x0F == 0 {
                 // 左 4 不同，右 4 相同；
                 // 奇数
+
+                libc_print::libc_println!("上 nybble_mismatch: {:?}", Some(1 + i * 2));
+
                 return Some(1 + i * 2);
             } else {
                 // 左 4 相同，右 4 不同；
                 // 左 4 不同，右 4 不同；
                 // 偶数
+
+                libc_print::libc_println!("下 nybble_mismatch: {:?}", Some(i * 2));
+
                 return Some(i * 2);
             }
         }
+
+        // 左 4 相同，右 4 相同；啥也不做
     }
 
     if left.len() == right.len() {

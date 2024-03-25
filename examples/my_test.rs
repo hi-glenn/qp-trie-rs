@@ -5,9 +5,21 @@ extern crate qp_trie;
 use qp_trie::*;
 
 fn main() {
-    test_get_lpm();
+    // test_get_lpm();
+
+    test_get_lpm2();
 }
 
+fn test_get_lpm2() {
+    let mut t = Trie::<&[u8], u32>::new();
+
+    t.insert("aba".as_bytes(), 1);
+
+    t.insert("abb".as_bytes(), 2);
+
+}
+
+#[allow(dead_code)]
 fn test_get_lpm() {
     println!("hello test_get_lpm");
 

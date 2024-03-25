@@ -254,7 +254,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 // exemplar.key.len()
                 // -----------
-                libc_println!("Hello {:?}!", 789);
+                libc_print::libc_println!("Hello {:?}!", 789);
                 
                 // --------
 
