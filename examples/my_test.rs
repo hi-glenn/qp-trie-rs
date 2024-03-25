@@ -13,9 +13,43 @@ fn main() {
 fn test_get_lpm2() {
     let mut t = Trie::<&[u8], u32>::new();
 
+    t.insert("abd".as_bytes(), 4);
+
+    t.insert("abe".as_bytes(), 5);
+
     t.insert("aba".as_bytes(), 1);
 
     t.insert("abb".as_bytes(), 2);
+
+    t.insert("abc".as_bytes(), 2);
+
+    
+
+    t.insert("abf".as_bytes(), 2);
+
+    t.insert("abg".as_bytes(), 2);
+    
+    t.insert("abh".as_bytes(), 2);
+    
+    t.insert("abi".as_bytes(), 2);
+    
+    t.insert("abj".as_bytes(), 2);
+    
+    t.insert("abk".as_bytes(), 2);
+
+    t.insert("abl".as_bytes(), 2);
+    
+    t.insert("abm".as_bytes(), 2);
+    
+    t.insert("abn".as_bytes(), 2);
+    
+    t.insert("abo".as_bytes(), 2);
+
+    
+
+    t.insert("ab'".as_bytes(), 3); // ----
+
+    t.insert("ab".as_bytes(), 3); // ----
 
 }
 
