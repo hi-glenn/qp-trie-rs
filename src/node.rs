@@ -512,6 +512,9 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                     )),
                     // 若两 key 不同
                     Some(mismatch) => {
+
+                        libc_print::libc_println!("trie.insert 两 key 不同; mismatch nybble byte: {:?}", mismatch);
+
                         // self 从 Leaf 变为了 Branch
                         // node 为 旧 Leaf
                         let node = mem::replace(self, Node::Branch(Branch::new(mismatch)));

@@ -7,6 +7,8 @@ use core::cmp;
 // return diff nybble byte
 #[inline]
 pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
+    libc_print::libc_println!("nybble_index(); n: {};", n);
+
     let byte_idx = n / 2;
 
     if byte_idx < slice.len() {
@@ -16,8 +18,10 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // In both cases, increment by one. The zero-index is reserved for the "head" of the sparse
         // array.
         if n & 1 == 0 {
+            libc_print::libc_println!("nybble_index(); n 为 偶数: 0b{:04b};", 1 + (byte & 0x0F));
             1 + (byte & 0x0F)
         } else {
+            libc_print::libc_println!("nybble_index(); n 为 奇数: 0b{:04b};", 1 + (byte >> 4));
             1 + (byte >> 4)
         }
     } else {
