@@ -103,14 +103,15 @@ impl<T> Sparse<T> {
         debug_assert!(!self.contains(idx));
         let i = self.actual(idx);
 
-        libc_print::libc_println!("insert sparce index: {:?}; index: {:b};", i, self.index);
-
         // match elt. {
         //     crate::node::Node::Leaf(..) =>{},
         //     crate::node::Node::Branch(..) =>{},
         // }
 
         self.index |= 1 << idx;
+
+        libc_print::libc_println!("insert sparce_index: {:?}; bitmap: 0b{:016b}; diff nybble: 0b{:04b};", i, self.index, idx);
+
         self.entries.insert(i, elt);
         &mut self.entries[i]
     }
