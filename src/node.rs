@@ -54,7 +54,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Create an empty `Branch` with the given choice point.
     #[inline]
     pub fn new(choice: usize) -> Branch<K, V> {
-        libc_print::libc_println!("new branch => choice: {:?}", choice);
+        libc_print::libc_println!("🌴 new branch => choice: {:?}", choice);
         Branch {
             choice,
             entries: Sparse::new(),
@@ -149,7 +149,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Convenience method for inserting a leaf into the branch's sparse array.
     #[inline]
     pub fn insert_leaf(&mut self, leaf: Leaf<K, V>) -> &mut Leaf<K, V> {
-        libc_print::libc_println!("insert_leaf");
+        libc_print::libc_println!("🍃insert_leaf");
 
         let node_mut = self.entries.insert(
             nybble_index(self.choice, leaf.key_slice()),
