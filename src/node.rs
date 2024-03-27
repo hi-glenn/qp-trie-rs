@@ -503,6 +503,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
     pub fn insert(&mut self, key: K, val: V) -> Option<V> {
         match *self {
             Node::Leaf(..) => {
+                libc_print::libc_println!("trie.insert-Leaf;");
+
                 // unsafe: self has been match'd as leaf.
                 match nybble_mismatch(unsafe { self.unwrap_leaf_ref() }.key_slice(), key.borrow()) {
                     // 若两 key 相同，则直接替换
@@ -537,6 +539,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             }
 
             Node::Branch(..) => {
+                libc_print::libc_println!("trie.insert-Branch;");
+
                 let (mismatch, mismatch_nybble) = {
                     let exemplar = self.get_exemplar_mut(key.borrow());
 
