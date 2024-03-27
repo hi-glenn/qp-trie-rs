@@ -58,12 +58,13 @@ fn test_get_lpm2() {
     println!("\nabo");
     t.insert("abo".as_bytes(), 15);
 
-    println!("\nab`");
-    t.insert("ab`".as_bytes(), 16); // ----
-
     println!("\nab");
     t.insert("ab".as_bytes(), 17); // ----
 
+    println!("\nab`");
+    t.insert("ab`".as_bytes(), 16); // ----
+
+    println!("\n--------------");
     let ret = t.get("abc".as_bytes());
     println!("🍟 get: {:?}", ret);
 }
