@@ -7,29 +7,32 @@ use qp_trie::*;
 fn main() {
     // test_get_lpm();
 
-    test_get_lpm2();
+    // test_get_lpm2();
 
-    // test_get_lpm3();
+    test_get_lpm3();
 }
 
 // 左 4 不同，右 4 相同
 fn test_get_lpm3() {
     let mut t = Trie::<&[u8], u32>::new();
 
-    println!("\nA");
-    t.insert("A".as_bytes(), 1);
+    println!("\n1b"); // 0x62
+    t.insert("1b".as_bytes(), 5);
 
-    println!("\nQ");
-    t.insert("Q".as_bytes(), 1);
+    println!("\n1A"); // 0x41
+    t.insert("1A".as_bytes(), 1);
 
-    println!("\na");
-    t.insert("a".as_bytes(), 1);
+    println!("\n1Q"); // 0x51
+    t.insert("1Q".as_bytes(), 2);
 
-    println!("\nq");
-    t.insert("q".as_bytes(), 1);
+    println!("\n1a"); // 0x61
+    t.insert("1a".as_bytes(), 3);
+
+    println!("\n1q"); // 0x71
+    t.insert("1q".as_bytes(), 4);
 
     println!("\n--------------");
-    let ret = t.get("abc".as_bytes());
+    let ret = t.get("1b".as_bytes());
     println!("🍟 get: {:?}", ret);
 }
 

@@ -124,6 +124,9 @@ impl<T> Sparse<T> {
         // }
 
         self.entries.insert(i, elt);
+
+        libc_print::libc_println!("🎀 sparce len: {}", self.entries.len());
+
         &mut self.entries[i]
     }
 

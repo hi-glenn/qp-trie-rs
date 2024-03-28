@@ -18,9 +18,11 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // In both cases, increment by one. The zero-index is reserved for the "head" of the sparse
         // array.
         if n & 1 == 0 {
+            // nybble_mismatch 为偶数；取右 4 位
             libc_print::libc_println!("nybble_index(); n 为 偶数; index: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte & 0x0F), n, slice.len());
             1 + (byte & 0x0F)
         } else {
+            // nybble_mismatch 为奇数；取左 4 位
             libc_print::libc_println!("nybble_index(); n 为 奇数; index: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte >> 4), n, slice.len());
             1 + (byte >> 4)
         }
