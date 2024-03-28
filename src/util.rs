@@ -31,7 +31,7 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // here - say it's branching at the `nth` nybble - contains a single entry of exactly `n /
         // 2` bytes long, then we have to have someplace to put it - the head. Essentially the head
         // is where leaf nodes which do not live at the fringes of the tree are stored.
-        libc_print::libc_println!("nybble_index(); n 为 0 🐷; nybble_mismatch: {}; slice_len: {};", n, slice.len());
+        libc_print::libc_println!("nybble_index(); 🐷; nybble_mismatch: {}; slice_len: {};", n, slice.len());
         0
     }
 }

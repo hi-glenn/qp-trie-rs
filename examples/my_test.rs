@@ -8,66 +8,91 @@ fn main() {
     // test_get_lpm();
 
     test_get_lpm2();
+
+    // test_get_lpm3();
 }
 
+// 左 4 不同，右 4 相同
+fn test_get_lpm3() {
+    let mut t = Trie::<&[u8], u32>::new();
+
+    println!("\nA");
+    t.insert("A".as_bytes(), 1);
+
+    println!("\nQ");
+    t.insert("Q".as_bytes(), 1);
+
+    println!("\na");
+    t.insert("a".as_bytes(), 1);
+
+    println!("\nq");
+    t.insert("q".as_bytes(), 1);
+
+    println!("\n--------------");
+    let ret = t.get("abc".as_bytes());
+    println!("🍟 get: {:?}", ret);
+}
+
+// 左 4 相同，右 4 不同
 fn test_get_lpm2() {
     let mut t = Trie::<&[u8], u32>::new();
 
     println!("\naba");
-    t.insert("abaddddd".as_bytes(), 1);
-
-
+    t.insert("1abaddddd".as_bytes(), 1);
 
     println!("\nabb");
-    t.insert("abb".as_bytes(), 2);
+    t.insert("1abb".as_bytes(), 2);
 
     println!("\nabc");
-    t.insert("abc".as_bytes(), 3);
+    t.insert("1abc".as_bytes(), 3);
 
     println!("\nabd");
-    t.insert("abd".as_bytes(), 4);
+    t.insert("1abd".as_bytes(), 4);
 
     println!("\nabe");
-    t.insert("abe".as_bytes(), 5);
+    t.insert("1abe".as_bytes(), 5);
 
     println!("\nabf");
-    t.insert("abf".as_bytes(), 6);
+    t.insert("1abf".as_bytes(), 6);
 
     println!("\nabg");
-    t.insert("abg".as_bytes(), 7);
+    t.insert("1abg".as_bytes(), 7);
 
     println!("\nabh");
-    t.insert("abh".as_bytes(), 8);
+    t.insert("1abh".as_bytes(), 8);
 
     println!("\nabi");
-    t.insert("abi".as_bytes(), 9);
+    t.insert("1abi".as_bytes(), 9);
 
     println!("\nabj");
-    t.insert("abj".as_bytes(), 10);
+    t.insert("1abj".as_bytes(), 10);
 
     println!("\nabk");
-    t.insert("abk".as_bytes(), 11);
+    t.insert("1abk".as_bytes(), 11);
 
     println!("\nabl");
-    t.insert("abl".as_bytes(), 12);
+    t.insert("1abl".as_bytes(), 12);
 
     println!("\nabm");
-    t.insert("abm".as_bytes(), 13);
+    t.insert("1abm".as_bytes(), 13);
 
     println!("\nabn");
-    t.insert("abn".as_bytes(), 14);
+    t.insert("1abn".as_bytes(), 14);
 
     println!("\nabo");
-    t.insert("abo".as_bytes(), 15);
+    t.insert("1abo".as_bytes(), 15);
 
     println!("\nab`");
-    t.insert("ab`".as_bytes(), 16); // ----
+    t.insert("1ab`".as_bytes(), 16); // ----
+
+    println!("\nabq");
+    t.insert("1abq".as_bytes(), 17); // ----
 
     println!("\nab");
-    t.insert("ab".as_bytes(), 17); // ----
+    t.insert("1ab".as_bytes(), 17); // ----
 
     println!("\n--------------");
-    let ret = t.get("abc".as_bytes());
+    let ret = t.get("1abr".as_bytes());
     println!("🍟 get: {:?}", ret);
 }
 

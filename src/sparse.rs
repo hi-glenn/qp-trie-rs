@@ -10,7 +10,7 @@ use unreachable::UncheckedOptionExt;
 #[derive(Clone, PartialEq, Eq)]
 pub struct Sparse<T> {
     index: u32, // bitmap
-pub    entries: Vec<T>,
+    pub entries: Vec<T>,
 }
 
 impl<T: fmt::Debug> fmt::Debug for Sparse<T> {
@@ -110,7 +110,18 @@ impl<T> Sparse<T> {
 
         self.index |= 1 << idx;
 
-        libc_print::libc_println!("🍎 insert sparce_index: {:?}; 17-bitmap: 0b{:017b}; diff nybble: 0b{:04b};", i, self.index, idx);
+        libc_print::libc_println!(
+            "🍎 insert sparce_index: {:?}; 17-bitmap: 0b{:017b}; diff nybble: 0b{:04b};",
+            i,
+            self.index,
+            idx
+        );
+
+        // if i != 0 {
+        //     self.entries.insert(i, elt);
+        // } else {
+        //     core::mem::replace(&mut self.entries[0], elt);
+        // }
 
         self.entries.insert(i, elt);
         &mut self.entries[i]
