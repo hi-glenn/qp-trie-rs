@@ -18,10 +18,10 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // In both cases, increment by one. The zero-index is reserved for the "head" of the sparse
         // array.
         if n & 1 == 0 {
-            libc_print::libc_println!("nybble_index(); n 为 偶数: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte & 0x0F), n, slice.len());
+            libc_print::libc_println!("nybble_index(); n 为 偶数; index: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte & 0x0F), n, slice.len());
             1 + (byte & 0x0F)
         } else {
-            libc_print::libc_println!("nybble_index(); n 为 奇数: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte >> 4), n, slice.len());
+            libc_print::libc_println!("nybble_index(); n 为 奇数; index: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 1 + (byte >> 4), n, slice.len());
             1 + (byte >> 4)
         }
     } else {
@@ -31,7 +31,7 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // here - say it's branching at the `nth` nybble - contains a single entry of exactly `n /
         // 2` bytes long, then we have to have someplace to put it - the head. Essentially the head
         // is where leaf nodes which do not live at the fringes of the tree are stored.
-        libc_print::libc_println!("nybble_index(); 🐷 0; nybble_mismatch: {}; slice_len: {};", n, slice.len());
+        libc_print::libc_println!("nybble_index(); n 为 0 🐷; nybble_mismatch: {}; slice_len: {};", n, slice.len());
         0
     }
 }

@@ -110,7 +110,7 @@ impl<T> Sparse<T> {
 
         self.index |= 1 << idx;
 
-        libc_print::libc_println!("🍎 insert sparce_index: {:?}; bitmap: 0b{:016b}; diff nybble: 0b{:04b};", i, self.index, idx);
+        libc_print::libc_println!("🍎 insert sparce_index: {:?}; 17-bitmap: 0b{:017b}; diff nybble: 0b{:04b};", i, self.index, idx);
 
         self.entries.insert(i, elt);
         &mut self.entries[i]

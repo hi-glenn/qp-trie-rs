@@ -13,8 +13,10 @@ fn main() {
 fn test_get_lpm2() {
     let mut t = Trie::<&[u8], u32>::new();
 
-    println!("aba");
+    println!("\naba");
     t.insert("abaddddd".as_bytes(), 1);
+
+
 
     println!("\nabb");
     t.insert("abb".as_bytes(), 2);
@@ -58,11 +60,11 @@ fn test_get_lpm2() {
     println!("\nabo");
     t.insert("abo".as_bytes(), 15);
 
-    println!("\nab");
-    t.insert("ab".as_bytes(), 17); // ----
-
     println!("\nab`");
     t.insert("ab`".as_bytes(), 16); // ----
+
+    println!("\nab");
+    t.insert("ab".as_bytes(), 17); // ----
 
     println!("\n--------------");
     let ret = t.get("abc".as_bytes());
