@@ -95,7 +95,7 @@ fn test_get_lpm2() {
     t.insert("1ab".as_bytes(), 17); // ----
 
     println!("\n--------------");
-    let ret = t.get("1abr".as_bytes());
+    let ret = t.get("1ab`".as_bytes());
     println!("🍟 get: {:?}", ret);
 }
 
