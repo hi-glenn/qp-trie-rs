@@ -50,8 +50,8 @@ pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
         difference = l ^ r;  // 比较有 4 种结果
 
         if difference != 0 {
-            // if difference & 0x0F == 0 {
-            if difference & 0xF0 > 0 {
+            if difference & 0x0F == 0 {
+            // if difference & 0xF0 > 0 {
                 // 左 4 不同，右 4 相同；
                 // 奇数
 

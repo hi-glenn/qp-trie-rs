@@ -7,9 +7,9 @@ use qp_trie::*;
 fn main() {
     // test_get_lpm();
 
-    // test_get_lpm2();
+    test_get_lpm2();
 
-    test_get_lpm3();
+    // test_get_lpm3();
 }
 
 // 左 4 不同，右 4 相同
