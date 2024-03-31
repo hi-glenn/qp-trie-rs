@@ -76,7 +76,10 @@ pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
         // 两 key 相同
         None
     } else {
-        // abc 与 abcd ；返回 d 第一个半字节的索引
+        // "abc" 与 "abcd": 返回 "d" 第一个半字节的索引
+        // "ab" 与 "ab`": 返回 "`" 第一个半字节的索引
+        // 偶数
+
         Some(cmp::min(left.len(), right.len()) * 2)
     }
 }
