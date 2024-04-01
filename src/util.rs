@@ -33,7 +33,7 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
         // here - say it's branching at the `nth` nybble - contains a single entry of exactly `n /
         // 2` bytes long, then we have to have someplace to put it - the head. Essentially the head
         // is where leaf nodes which do not live at the fringes of the tree are stored.
-        libc_print::libc_println!("nybble_index(); 🐷; nybble_mismatch: {}; slice_len: {};", n, slice.len());
+        libc_print::libc_println!("nybble_index(); 🐷; index: 0b{:04b}; nybble_mismatch: {}; slice_len: {};", 0, n, slice.len());
         0
     }
 }
@@ -44,6 +44,9 @@ pub fn nybble_index(n: usize, slice: &[u8]) -> u8 {
 // considered the mismatch point.
 #[inline]
 pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
+
+    libc_print::libc_println!("🤢 old_key: {}; new_key: {}; key_len equal: {};", left.len(), right.len(), left.len() == right.len());
+
     let mut difference;
 
     for (i, (l, r)) in left.iter().cloned().zip(right.iter().cloned()).enumerate() {

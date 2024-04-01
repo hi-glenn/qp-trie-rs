@@ -89,14 +89,27 @@ fn test_get_lpm2() {
     t.insert("1ab`".as_bytes(), 16); // ----
 
     println!("\nabq");
-    t.insert("1abq".as_bytes(), 17); // ----
+    t.insert("1abq".as_bytes(), 18); // ----
 
-    println!("\nab");
+    println!("\n1ab");
     t.insert("1ab".as_bytes(), 17); // ----
+
+    println!("\n1ab");
+    let ret = t.get("1ab".as_bytes());
+    println!("🍟 get: {:?}", ret);
+
+    println!("\n1a");
+    t.insert("1a".as_bytes(), 19); // ----
 
     println!("\n--------------");
     let ret = t.get("1ab`".as_bytes());
     println!("🍟 get: {:?}", ret);
+
+
+    println!("\n");
+    let ret = t.get("1a".as_bytes());
+    println!("🍟 get: {:?}", ret);
+
 }
 
 #[allow(dead_code)]

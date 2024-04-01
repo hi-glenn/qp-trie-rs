@@ -162,6 +162,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Convenience method for inserting a branch into the branch's sparse array.
     #[inline]
     pub fn insert_branch(&mut self, index: u8, branch: Branch<K, V>) -> &mut Branch<K, V> {
+        // libc_print::libc_println!("🌴 insert_branch; key_len: {};", branch. leaf.key_slice().len());
         let node_mut = self.entries.insert(index, Node::Branch(branch));
 
         unsafe { node_mut.unwrap_branch_mut() }
@@ -216,6 +217,8 @@ impl<K, V> IntoIterator for Branch<K, V> {
 pub enum Node<K, V> {
     Leaf(Leaf<K, V>),
     Branch(Branch<K, V>),
+    // NULL
+    // None(None),
 }
 
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Node<K, V> {
@@ -231,6 +234,8 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Node<K, V> {
                 .field("choice", &branch.choice)
                 .field("entries", &branch.entries)
                 .finish(),
+            // Node::NULL => {}
+            // _ => Ok(())
         }
     }
 }
