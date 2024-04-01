@@ -29,8 +29,9 @@ impl<K, V> Iterator for IntoIter<K, V> {
             Some(Node::Branch(branch)) => {
                 self.stack.extend(branch.into_iter().rev());
                 self.next()
-            }
+            },
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }
@@ -62,8 +63,9 @@ impl<'a, K: 'a, V: 'a> Iterator for Iter<'a, K, V> {
             Some(Node::Branch(branch)) => {
                 self.stack.extend(branch.iter().rev());
                 self.next()
-            }
+            },
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }
@@ -97,6 +99,7 @@ impl<'a, K: 'a, V: 'a> Iterator for IterMut<'a, K, V> {
                 self.next()
             }
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }
@@ -130,6 +133,7 @@ impl<'a, K: 'a, V: 'a> Iterator for Keys<'a, K, V> {
                 self.next()
             }
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }
@@ -163,6 +167,7 @@ impl<'a, K: 'a, V: 'a> Iterator for Values<'a, K, V> {
                 self.next()
             }
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }
@@ -196,6 +201,7 @@ impl<'a, K: 'a, V: 'a> Iterator for ValuesMut<'a, K, V> {
                 self.next()
             }
             None => None,
+            Some(Node::NULL) => unsafe {debug_unreachable!()},
         }
     }
 }

@@ -181,7 +181,7 @@ impl<'a, K: 'a + Borrow<[u8]>, V: 'a> OccupiedEntry<'a, K, V> {
 
                 debug_assert!(leaf.key_slice() == self.key().borrow());
                 (leaf.key, leaf.val)
-            }
+            },
 
             Some(Node::Branch(_)) => {
                 let branch_opt = root.as_mut();
@@ -193,7 +193,9 @@ impl<'a, K: 'a + Borrow<[u8]>, V: 'a> OccupiedEntry<'a, K, V> {
                 let leaf = unsafe { leaf_opt.unchecked_unwrap() };
 
                 (leaf.key, leaf.val)
-            }
+            },
+
+            Some(Node::NULL)=>unsafe { debug_unreachable!() },
 
             None => unsafe { debug_unreachable!() },
         }

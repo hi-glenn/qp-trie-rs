@@ -57,7 +57,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
         libc_print::libc_println!("🌴 new branch => choice: {:?}", choice);
         Branch {
             choice,
-            entries: Sparse::new(),
+            entries: {let mut s = Sparse::new(); s.insert(0, Node::NULL); s},
         }
     }
 
@@ -146,6 +146,20 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
         self.exemplar_mut(key.borrow()).get_exemplar_mut(key)
     }
 
+    #[inline]
+    pub fn insert_null(&mut self) {
+        libc_print::libc_println!("🤡 insert_null;");
+
+        // let node_mut = self.entries.insert(
+        //     0,
+        //     Node::NULL,
+        // );
+
+        self.entries.insert(0, Node::NULL);
+
+        // unsafe { node_mut.unwrap_leaf_mut() }
+    }
+
     // Convenience method for inserting a leaf into the branch's sparse array.
     #[inline]
     pub fn insert_leaf(&mut self, leaf: Leaf<K, V>) -> &mut Leaf<K, V> {
@@ -162,7 +176,7 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
     // Convenience method for inserting a branch into the branch's sparse array.
     #[inline]
     pub fn insert_branch(&mut self, index: u8, branch: Branch<K, V>) -> &mut Branch<K, V> {
-        // libc_print::libc_println!("🌴 insert_branch; key_len: {};", branch. leaf.key_slice().len());
+        libc_print::libc_println!("🌴 insert_branch; branch.choice: {};", branch.choice);
         let node_mut = self.entries.insert(index, Node::Branch(branch));
 
         unsafe { node_mut.unwrap_branch_mut() }
@@ -217,7 +231,7 @@ impl<K, V> IntoIterator for Branch<K, V> {
 pub enum Node<K, V> {
     Leaf(Leaf<K, V>),
     Branch(Branch<K, V>),
-    // NULL
+    NULL
     // None(None),
 }
 
@@ -234,7 +248,7 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Node<K, V> {
                 .field("choice", &branch.choice)
                 .field("entries", &branch.entries)
                 .finish(),
-            // Node::NULL => {}
+            Node::NULL => f.write_str("NULL"),
             // _ => Ok(())
         }
     }
@@ -255,6 +269,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match self {
             Node::Leaf(leaf) => leaf,
             Node::Branch(..) => debug_unreachable!(),
+            Node::NULL => debug_unreachable!(),
         }
     }
 
@@ -263,6 +278,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(ref leaf) => leaf,
             Node::Branch(..) => debug_unreachable!(),
+            Node::NULL => debug_unreachable!(),
         }
     }
 
@@ -271,6 +287,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(ref mut leaf) => leaf,
             Node::Branch(..) => debug_unreachable!(),
+            Node::NULL => debug_unreachable!(),
         }
     }
 
@@ -279,6 +296,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(..) => debug_unreachable!(),
             Node::Branch(ref branch) => branch,
+            Node::NULL => debug_unreachable!(),
         }
     }
 
@@ -287,6 +305,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(..) => debug_unreachable!(),
             Node::Branch(ref mut branch) => branch,
+            Node::NULL => debug_unreachable!(),
         }
     }
 
@@ -306,13 +325,12 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 } else {
                     // branch.get(key)
                 }
-                
-                
 
                 // Some(unsafe { branch.entries.entries[0].unwrap_leaf_ref() })
 
                 branch.get(key)
             },
+            Node::NULL => None,
         }
     }
 
@@ -323,6 +341,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
             Node::Leaf(..) => None,
 
             Node::Branch(ref mut branch) => branch.get_mut(key),
+
+            Node::NULL => None,
         }
     }
 
@@ -338,6 +358,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(ref leaf) => leaf,
             Node::Branch(ref branch) => branch.get_exemplar(key),
+            // Node::NULL => 
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -346,6 +368,7 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         match *self {
             Node::Leaf(ref mut leaf) => leaf,
             Node::Branch(ref mut branch) => branch.get_exemplar_mut(key),
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -368,7 +391,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
 
                     child.get_prefix_validated(prefix)
                 }
-            }
+            },
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -411,7 +435,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
 
                     child.get_prefix_validated_mut(prefix)
                 }
-            }
+            },
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -445,7 +470,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 } else {
                     None
                 }
-            }
+            },
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -497,7 +523,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 let graft_branch = unsafe { self.unwrap_branch_mut() };
                 graft_branch.insert_branch(graft_nybble, branch);
                 graft_branch
-            }
+            },
+            Node::NULL => unsafe{debug_unreachable!()},
         };
 
         // 插入 new leaf
@@ -532,6 +559,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                         // unsafe: self has just been replaced with a branch.
                         let branch = unsafe { self.unwrap_branch_mut() };
 
+                        // branch.insert_null();
+
                         // 插入 新 leaf
                         branch.insert_leaf(Leaf::new(key, val));
 
@@ -560,7 +589,9 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 self.insert_with_graft_point(mismatch, mismatch_nybble, key, val);
 
                 None
-            }
+            },
+
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -604,7 +635,9 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 }
 
                 Some(leaf)
-            }
+            },
+
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -665,7 +698,8 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
                 }
 
                 Some(prefix_node)
-            }
+            },
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
@@ -706,6 +740,7 @@ impl<K, V> Node<K, V> {
         match *self {
             Node::Leaf(..) => 1,
             Node::Branch(ref branch) => branch.count(),
+            Node::NULL => unsafe{debug_unreachable!()},
         }
     }
 
