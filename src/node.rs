@@ -146,19 +146,19 @@ impl<K: Borrow<[u8]>, V> Branch<K, V> {
         self.exemplar_mut(key.borrow()).get_exemplar_mut(key)
     }
 
-    #[inline]
-    pub fn insert_null(&mut self) {
-        libc_print::libc_println!("🤡 insert_null;");
+    // #[inline]
+    // pub fn insert_null(&mut self) {
+    //     libc_print::libc_println!("🤡 insert_null;");
 
-        // let node_mut = self.entries.insert(
-        //     0,
-        //     Node::NULL,
-        // );
+    //     // let node_mut = self.entries.insert(
+    //     //     0,
+    //     //     Node::NULL,
+    //     // );
 
-        self.entries.insert(0, Node::NULL);
+    //     self.entries.insert(0, Node::NULL);
 
-        // unsafe { node_mut.unwrap_leaf_mut() }
-    }
+    //     // unsafe { node_mut.unwrap_leaf_mut() }
+    // }
 
     // Convenience method for inserting a leaf into the branch's sparse array.
     #[inline]
