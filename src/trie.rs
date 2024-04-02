@@ -236,14 +236,13 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
-   /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-   pub fn get_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
-   where
-       K: Borrow<Q>,
-       Q: Borrow<[u8]>,
-   {
-
-           match self.root.as_ref() {
+    /// Get an immutable reference to the value associated with a given key, if it is in the tree.
+    pub fn get_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
             Some(root) => {
                 let exemplar = root.get_exemplar(key.borrow());
 
@@ -254,15 +253,50 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 // exemplar.key.len()
                 // -----------
-                libc_print::libc_println!("Hello {:?}!", 789);
-                
+                // libc_print::libc_println!("Hello {:?}!", exemplar.val);
+
+                // if exemplar.key_slice().len() <= key.borrow().len() {
+
+                // }
+
+                libc_print::libc_println!("get_lpm(): exemplar.key_slice().len: {};", exemplar.key_slice().len());
+
+                match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
+                    Some(mut i) => {
+                        libc_print::libc_println!("get_lpm(): nybble: {};", i);
+
+                        if i & 1 > 0 {
+                            // 奇数
+                            i -= 1;
+                        }
+
+                        i >>= 1;
+
+                        libc_print::libc_println!("get_lpm(): diff byte: {};", i);
+
+                        if i + 1 <= exemplar.key_slice().len() {
+                            None
+                        } else {
+                            Some(&exemplar.val)
+                        }
+
+                        // exemplar.key.find_break(i / 2)
+                    }
+                    None => {
+                        // 两 key 相等
+                        libc_print::libc_println!("get_lpm(): inner NONE");
+                        // exemplar.key.borrow()
+
+                        Some(&exemplar.val)
+                    }
+                }
                 // --------
 
-                Some(&exemplar.val)
+                // Some(&exemplar.val)
             }
             None => None,
         }
-   }
+    }
 
     /// Get the longest common prefix of all the nodes in the trie and the given key.
     pub fn longest_common_prefix<'a, Q: ?Sized>(&'a self, key: &Q) -> &'a K::Split
@@ -275,11 +309,21 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let exemplar = root.get_exemplar(key.borrow());
 
                 match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
-                    Some(i) => exemplar.key.find_break(i / 2),
-                    None => exemplar.key.borrow(),
+                    Some(i) => {
+                        libc_print::libc_println!("longest_common_prefix(): nybble: {};", i);
+                        exemplar.key.find_break(i / 2)
+                        // exemplar.key.borrow()
+                    }
+                    None => {
+                        libc_print::libc_println!("longest_common_prefix(): inner NONE");
+                        exemplar.key.borrow()
+                    }
                 }
             }
-            None => K::empty(),
+            None => {
+                libc_print::libc_println!("longest_common_prefix(): empty()");
+                K::empty()
+            }
         }
     }
 

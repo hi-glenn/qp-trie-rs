@@ -5,9 +5,9 @@ extern crate qp_trie;
 use qp_trie::*;
 
 fn main() {
-    // test_get_lpm();
+    test_get_lpm();
 
-    test_get_lpm2();
+    // test_get_lpm2();
 
     // test_get_lpm3();
 }
@@ -105,11 +105,9 @@ fn test_get_lpm2() {
     let ret = t.get("1ab`".as_bytes());
     println!("🍟 get: {:?}", ret);
 
-
     println!("\n");
     let ret = t.get("1a".as_bytes());
     println!("🍟 get: {:?}", ret);
-
 }
 
 #[allow(dead_code)]
@@ -118,34 +116,47 @@ fn test_get_lpm() {
 
     let mut t = Trie::<&[u8], u32>::new();
 
-    let k1 = "moc.udiab";
-    let k2 = "moc.udiab.www";
-    let k2_1 = "moc.udiab.wwx";
-    let k2_2 = "moc.udiab.wwy";
+    println!("\n abcdefg");
+    t.insert("abcdefg".as_bytes(), 1);
 
-    t.insert(k1.as_bytes(), 1);
+    println!("\n abcd");
+    t.insert("abcd".as_bytes(), 2);
 
-    t.insert(k2.as_bytes(), 2);
+    println!("\n abce");
+    t.insert("abce".as_bytes(), 3);
 
-    t.insert(k2_1.as_bytes(), 3);
+    println!("\n abcf");
+    t.insert("abcf".as_bytes(), 4);
 
-    t.insert(k2_2.as_bytes(), 4);
+    println!("\n ab");
+    t.insert("ab".as_bytes(), 5);
 
-    let k3 = "moc.udiab.www.1";
-    let ret = t.get_lpm(k3.as_bytes());
-    println!("ret: {:?}", ret);
+    println!("\n ab`");
+    t.insert("ab`".as_bytes(), 6);
 
-    let k4 = "moc.udiab.w";
-    let ret = t.get_lpm(k4.as_bytes());
-    println!("ret: {:?}", ret);
+    println!("\n get_lpm cbcef");
+    let ret = t.get_lpm("cbcef".as_bytes());
+    println!("🌹 get_lpm: {:?}", ret);
 
-    let k5 = "moc.udia";
-    let ret = t.longest_common_prefix(k5.as_bytes());
+    println!("\n get_lpm abc");
+    let ret = t.get_lpm("abc".as_bytes()); // hit abcd
+    println!("🌹 get_lpm: {:?}", ret);
+
+    println!("\n longest_common abc");
+    let ret = t.longest_common_prefix("abc".as_bytes()); // hit abcd
     println!(
-        "ret: {:?}",
+        "🌹 common key: {:?}",
         std::str::from_utf8(ret).expect("Invalid UTF-8")
     );
 
-    let ret = t.get(k4.as_bytes());
-    println!("get: {:?}", ret);
+    println!("\n longest_common cbcef");
+    let ret = t.longest_common_prefix("cbcef".as_bytes());
+    println!(
+        "🌹 common key: {:?}",
+        std::str::from_utf8(ret).expect("Invalid UTF-8")
+    );
+
+    // println!("\n moc.udia");
+    // let ret = t.get("moc.udia".as_bytes());
+    // println!("get: {:?}", ret);
 }
