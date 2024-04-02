@@ -75,6 +75,8 @@ impl<T> Sparse<T> {
     // TODO: Faster to not branch and just calculate the index and return it?
     #[inline]
     pub fn get_or_any(&self, idx: u8) -> &T {
+        libc_print::libc_println!("get_or_any(); self.entries.len: {};", self.entries.len());
+
         if self.contains(idx) {
             &self.entries[self.actual(idx)]
         } else {
