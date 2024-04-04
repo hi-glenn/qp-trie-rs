@@ -309,7 +309,22 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     {
         match self.root.as_ref() {
             Some(root) => {
-                let exemplar = root.get_exemplar_lpm(key.borrow());
+                let mut count: u32 = 0;
+                let mut t: &Node<K, V> = root;
+                while let Node::Branch(ref branch) = *t {
+                    libc_print::libc_println!("🐠 loop count: {};", count);
+                    count += 1;
+
+                    t = branch
+                        .entries
+                        .get_or_any(crate::util::nybble_index(branch.choice, key.borrow()));
+                }
+
+                // -----
+
+                // let exemplar = root.get_exemplar_lpm(key.borrow());
+
+                let exemplar = unsafe { t.unwrap_leaf_ref() };
 
                 // match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
                 //     Some(i) => exemplar.key.find_break(i / 2),
@@ -358,9 +373,6 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                         Some(&exemplar.val)
                     }
                 }
-                // --------
-
-                // Some(&exemplar.val)
             }
             None => None,
         }
