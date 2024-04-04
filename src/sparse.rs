@@ -75,7 +75,22 @@ impl<T> Sparse<T> {
     // TODO: Faster to not branch and just calculate the index and return it?
     #[inline]
     pub fn get_or_any(&self, idx: u8) -> &T {
-        libc_print::libc_println!("get_or_any(); self.entries.len: {};", self.entries.len());
+        libc_print::libc_println!("get_or_any(); self.entries.len: {}; idx: {};", self.entries.len(), idx);
+
+        // if self.entries.len() == 3 && idx == 4 {
+        //     libc_print::libc_println!("layer 1");
+        //     return &self.entries[0]
+        // }
+
+        // if self.entries.len() == 3 && idx == 0 {
+        //     libc_print::libc_println!("layer 2");
+        //     return &self.entries[0]
+        // }
+
+        // if self.entries.len() == 2 && idx == 0 {
+        //     libc_print::libc_println!("layer 3");
+        //     return &self.entries[0]
+        // }
 
         if self.contains(idx) {
             &self.entries[self.actual(idx)]

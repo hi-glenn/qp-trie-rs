@@ -135,11 +135,11 @@ fn test_get_lpm() {
     t.insert("ab`".as_bytes(), 6);
 
     println!("\n get_lpm cbcef");
-    let ret = t.get_lpm("cbcef".as_bytes());
+    let ret = t.get_lpm2("cbcef".as_bytes());
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n get_lpm abc");
-    let ret = t.get_lpm("abc".as_bytes()); // hit abcd
+    let ret = t.get_lpm2("abc".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n longest_common abc");
@@ -149,12 +149,12 @@ fn test_get_lpm() {
         std::str::from_utf8(ret).expect("Invalid UTF-8")
     );
 
-    println!("\n longest_common cbcef");
-    let ret = t.longest_common_prefix("cbcef".as_bytes());
-    println!(
-        "🌹 common key: {:?}",
-        std::str::from_utf8(ret).expect("Invalid UTF-8")
-    );
+    // println!("\n longest_common cbcef");
+    // let ret = t.longest_common_prefix("cbcef".as_bytes());
+    // println!(
+    //     "🌹 common key: {:?}",
+    //     std::str::from_utf8(ret).expect("Invalid UTF-8")
+    // );
 
     // println!("\n moc.udia");
     // let ret = t.get("moc.udia".as_bytes());

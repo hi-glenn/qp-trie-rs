@@ -341,6 +341,13 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         }
     }
 
+    pub fn get_exemplar_lpm(&self, key: &[u8]) -> &Leaf<K, V> {
+        match *self {
+            Node::Leaf(ref leaf) => leaf,
+            Node::Branch(ref branch) => branch.get_exemplar(key),
+        }
+    }
+
     // Mutably borrow the exemplar for a given key.
     pub fn get_exemplar_mut(&mut self, key: &[u8]) -> &mut Leaf<K, V> {
         match *self {
