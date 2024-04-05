@@ -315,9 +315,20 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                     libc_print::libc_println!("🐠 loop count: {};", count);
                     count += 1;
 
-                    t = branch
-                        .entries
-                        .get_or_any(crate::util::nybble_index(branch.choice, key.borrow()));
+                    // ok
+                    // t = branch
+                    //     .entries
+                    //     .get_or_any(crate::util::nybble_index(branch.choice, key.borrow()));
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    t = {
+                        if branch.entries.contains(idx) {
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+
                 }
 
                 // -----
