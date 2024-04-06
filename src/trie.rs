@@ -302,15 +302,18 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     }
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-    pub fn get_lpm2<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    pub fn get_lpm2<'a, Q: ?Sized>(&'a self, key: &Q) -> (Option<&'a V>, Option<&'a V>)
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
     {
+        let mut l: Option<&'a V> = None;
+
         match self.root.as_ref() {
             Some(root) => {
                 let mut count: u32 = 0;
                 let mut t: &Node<K, V> = root;
+
                 while let Node::Branch(ref branch) = *t {
                     libc_print::libc_println!("🐠 loop count: {};", count);
                     count += 1;
@@ -323,12 +326,23 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                     let idx = crate::util::nybble_index(branch.choice, key.borrow());
                     t = {
                         if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[0..leaf.key_slice().len()]
+                                    {
+                                        l = Some(&leaf.val);
+                                        // if leaf.key_slice() ==  &key.borrow()[0..leaf.key_slice().len()]{
+                                        //     l = Some(&leaf.val);
+                                        // }
+                                    }
+                                }
+                            }
+
                             &branch.entries.entries[branch.entries.actual(idx)]
                         } else {
                             &branch.entries.entries[0]
                         }
                     }
-
                 }
 
                 // -----
@@ -369,9 +383,9 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                         libc_print::libc_println!("get_lpm(): diff byte: {};", i);
 
                         if i + 1 <= exemplar.key_slice().len() {
-                            None
+                            (None, l)
                         } else {
-                            Some(&exemplar.val)
+                            (Some(&exemplar.val), l)
                         }
 
                         // exemplar.key.find_break(i / 2)
@@ -381,11 +395,11 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                         libc_print::libc_println!("get_lpm(): inner NONE");
                         // exemplar.key.borrow()
 
-                        Some(&exemplar.val)
+                        (Some(&exemplar.val), l)
                     }
                 }
             }
-            None => None,
+            None => (None, l),
         }
     }
 
