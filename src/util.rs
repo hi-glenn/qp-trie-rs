@@ -54,8 +54,9 @@ pub fn nybble_mismatch(left: &[u8], right: &[u8]) -> Option<usize> {
 
         if difference != 0 {
             if difference & 0x0F == 0 {
+            // 左 4 不同，右 4 相同；
+
             // if difference & 0xF0 > 0 {
-                // 左 4 不同，右 4 相同；
                 // 奇数
 
                 libc_print::libc_println!("上 nybble_mismatch: {:?}", Some(1 + i * 2));
