@@ -5,11 +5,39 @@ extern crate qp_trie;
 use qp_trie::*;
 
 fn main() {
-    test_get_lpm();
+    // test_get_lpm();
 
     // test_get_lpm2();
 
     // test_get_lpm3();
+
+    test_zone_lpm();
+}
+
+fn test_zone_lpm() {
+    // moc.elpmaxe.www.bus
+    // moc.elpmaxe.www
+    // moc.elpmaxe
+    // moc
+    println!("hello test_zone_lpm");
+
+    let mut t = Trie::<&[u8], u32>::new();
+
+    println!("\n moc");
+    t.insert("moc".as_bytes(), 1);
+
+    println!("\n moc.elpmaxe");
+    t.insert("moc.elpmaxe".as_bytes(), 2);
+
+    println!("\n moc.elpmaxe.www");
+    t.insert("moc.elpmaxe.www".as_bytes(), 3);
+
+    println!("\n moc.elpmaxe.www.bus");
+    t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
+
+    println!("\n get_lpm mo");
+    let ret = t.get_lpm2("mo".as_bytes());
+    println!("🌹 get_lpm: {:?}\n", ret);
 }
 
 // 左 4 不同，右 4 相同
