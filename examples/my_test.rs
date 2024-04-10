@@ -146,6 +146,10 @@ fn test_get_lpm() {
     let ret = t.get_lpm2("abc".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
+    println!("\n get_lpm ab");
+    let ret = t.get_lpm2("ab".as_bytes()); // hit abcd
+    println!("🌹 get_lpm: {:?}", ret);
+
     println!("\n longest_common abc");
     let ret = t.longest_common_prefix("abc".as_bytes()); // hit abcd
     println!(

@@ -302,27 +302,24 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     }
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-    pub fn get_lpm2<'a, Q: ?Sized>(&'a self, key: &Q) -> (Option<&'a V>, Option<&'a V>)
+    pub fn get_lpm2<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V> // (Option<&'a V>, Option<&'a V>)
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
     {
-        let mut l: Option<&'a V> = None;
-
         match self.root.as_ref() {
             Some(root) => {
                 let mut count: u32 = 0;
                 let mut t: &Node<K, V> = root;
+                let mut l: Option<&'a V> = None;
 
                 while let Node::Branch(ref branch) = *t {
                     libc_print::libc_println!("🐠 loop count: {};", count);
                     count += 1;
-
                     // ok
                     // t = branch
                     //     .entries
                     //     .get_or_any(crate::util::nybble_index(branch.choice, key.borrow()));
-
                     let idx = crate::util::nybble_index(branch.choice, key.borrow());
                     t = {
                         if branch.entries.contains(idx) {
@@ -331,75 +328,18 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                     if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[0..leaf.key_slice().len()]
                                     {
                                         l = Some(&leaf.val);
-                                        // if leaf.key_slice() ==  &key.borrow()[0..leaf.key_slice().len()]{
-                                        //     l = Some(&leaf.val);
-                                        // }
                                     }
                                 }
                             }
-
                             &branch.entries.entries[branch.entries.actual(idx)]
                         } else {
                             &branch.entries.entries[0]
                         }
                     }
                 }
-
-                // -----
-
-                // let exemplar = root.get_exemplar_lpm(key.borrow());
-
-                let exemplar = unsafe { t.unwrap_leaf_ref() };
-
-                // match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
-                //     Some(i) => exemplar.key.find_break(i / 2),
-                //     None => exemplar.key.borrow(),
-                // }
-
-                // exemplar.key.len()
-                // -----------
-                // libc_print::libc_println!("Hello {:?}!", exemplar.val);
-
-                // if exemplar.key_slice().len() <= key.borrow().len() {
-
-                // }
-
-                libc_print::libc_println!(
-                    "get_lpm(): exemplar.key_slice().len: {};",
-                    exemplar.key_slice().len()
-                );
-
-                match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
-                    Some(mut i) => {
-                        libc_print::libc_println!("get_lpm(): nybble: {};", i);
-
-                        if i & 1 > 0 {
-                            // 奇数
-                            i -= 1;
-                        }
-
-                        i >>= 1;
-
-                        libc_print::libc_println!("get_lpm(): diff byte: {};", i);
-
-                        if i + 1 <= exemplar.key_slice().len() {
-                            (None, l)
-                        } else {
-                            (Some(&exemplar.val), l)
-                        }
-
-                        // exemplar.key.find_break(i / 2)
-                    }
-                    None => {
-                        // 两 key 相等
-                        libc_print::libc_println!("get_lpm(): inner NONE");
-                        // exemplar.key.borrow()
-
-                        (Some(&exemplar.val), l)
-                    }
-                }
+                l
             }
-            None => (None, l),
+            None => None,
         }
     }
 
