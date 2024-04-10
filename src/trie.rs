@@ -302,8 +302,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     }
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-    pub fn get_lpm2<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
-    // (Option<&'a V>, Option<&'a V>)
+    pub fn get_zone_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,

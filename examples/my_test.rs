@@ -36,7 +36,7 @@ fn test_zone_lpm() {
     t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
 
     println!("\n get_lpm mo");
-    let ret = t.get_lpm2("mo".as_bytes());
+    let ret = t.get_zone_lpm("mo".as_bytes());
     println!("🌹 get_lpm: {:?}\n", ret);
 }
 
@@ -163,7 +163,7 @@ fn test_get_lpm() {
     t.insert("ab`".as_bytes(), 6);
 
     println!("\n get_lpm cbcef");
-    let ret = t.get_lpm2("cbcef".as_bytes());
+    let ret = t.get_zone_lpm("cbcef".as_bytes());
     println!("🌹 get_lpm: {:?}", ret);
 
     // println!("\n get_lpm ab");
@@ -171,11 +171,11 @@ fn test_get_lpm() {
     // println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n get_lpm abc");
-    let ret = t.get_lpm2("abc".as_bytes()); // hit abcd
+    let ret = t.get_zone_lpm("abc".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n get_lpm ab");
-    let ret = t.get_lpm2("ab".as_bytes()); // hit abcd
+    let ret = t.get_zone_lpm("ab".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n longest_common abc");
