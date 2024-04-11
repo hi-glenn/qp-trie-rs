@@ -234,6 +234,54 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
+    /// Get a immutable reference to the value corresponding to the longest common prefix
+    #[inline(always)]
+    pub fn get_zone_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut t: &Node<K, V> = root;
+                let mut l: Option<&'a V> = None;
+
+                while let Node::Branch(ref branch) = *t {
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    t = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    if leaf.key_slice().len() <= key.borrow().len()
+                                        && leaf.key_slice()
+                                            == &key.borrow()[0..leaf.key_slice().len()]
+                                    {
+                                        l = Some(&leaf.val);
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { t.unwrap_leaf_ref() };
+                if exemplar.key_slice().len() <= key.borrow().len()
+                    && exemplar.key_slice() == &key.borrow()[0..exemplar.key_slice().len()]
+                {
+                    return Some(&exemplar.val);
+                }
+
+                l
+
+            }
+            None => None,
+        }
+    }
+
     /// Get the longest common prefix of all the nodes in the trie and the given key.
     pub fn longest_common_prefix<'a, Q: ?Sized>(&'a self, key: &Q) -> &'a K::Split
     where

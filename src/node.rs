@@ -37,8 +37,8 @@ impl<K: Borrow<[u8]>, V> Leaf<K, V> {
 pub struct Branch<K, V> {
     // The nybble that this `Branch` cares about. Entries in the `entries` sparse array correspond
     // to different values of the nybble at the choice point for given keys.
-    choice: usize,
-    entries: Sparse<Node<K, V>>,
+pub    choice: usize,
+pub    entries: Sparse<Node<K, V>>,
 }
 
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Branch<K, V> {

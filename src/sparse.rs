@@ -10,7 +10,7 @@ use unreachable::UncheckedOptionExt;
 #[derive(Clone, PartialEq, Eq)]
 pub struct Sparse<T> {
     index: u32,
-    entries: Vec<T>,
+pub    entries: Vec<T>,
 }
 
 impl<T: fmt::Debug> fmt::Debug for Sparse<T> {
@@ -39,7 +39,7 @@ impl<T> Sparse<T> {
 
     // Go from a nybble-index to an index in the internal element vector.
     #[inline]
-    fn actual(&self, idx: u8) -> usize {
+pub    fn actual(&self, idx: u8) -> usize {
         (self.index & ((1 << idx) - 1)).count_ones() as usize
     }
 
