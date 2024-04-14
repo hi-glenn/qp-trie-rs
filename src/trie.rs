@@ -247,6 +247,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut l: Option<&'a V> = None;
 
                 while let Node::Branch(ref branch) = *t {
+                    unsafe { core::intrinsics::prefetch_read_instruction(branch.entries.entries.as_ptr(), 0) };
 
                     let idx = crate::util::nybble_index(branch.choice, key.borrow());
                     t = {
