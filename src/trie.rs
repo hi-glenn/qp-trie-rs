@@ -314,6 +314,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut l: Option<&'a V> = None;
 
                 while let Node::Branch(ref branch) = *t {
+                    unsafe { core::intrinsics::prefetch_read_instruction(branch.entries.entries.as_ptr(), 0) };
+
                     libc_print::libc_println!("🐠 loop count: {};", count);
                     count += 1;
                     // ok
