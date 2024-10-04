@@ -325,11 +325,17 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                         if branch.entries.contains(idx) {
                             if branch.entries.entries.len() > 0 {
                                 if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
-                                    if leaf.key_slice().len() <= key.borrow().len()
-                                        && leaf.key_slice()
-                                            == &key.borrow()[0..leaf.key_slice().len()]
+                                    // leaf.key_slice().len() <= key.borrow().len() && 
+                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()]
                                     {
                                         l = Some(&leaf.val);
+
+                                        unsafe {
+                                            let d = &leaf.val as *const V as *const u32;
+
+                                            libc_print::libc_println!("🐠 val: {:?};", *d);
+                                        }
+
                                     }
                                 }
                             }
@@ -344,10 +350,18 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 if exemplar.key_slice().len() == key.borrow().len()
                     && exemplar.key_slice() == key.borrow()
                 {
+
+                    unsafe {
+                        let d = &exemplar.val as *const V as *const u32;
+    
+                        libc_print::libc_println!("🐠🐠 val: {:?};", *d);
+                    }
+
                     return Some(&exemplar.val);
                 }
 
                 l
+
                 // match nybble_mismatch(exemplar.key_slice(), key.borrow()) {
                 //     Some(mut i) => {
                 //         libc_print::libc_println!("get_lpm(): nybble: {};", i);

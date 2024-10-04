@@ -36,7 +36,10 @@ fn test_zone_lpm() {
     t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
 
     println!("\n get_lpm mo");
-    let ret = t.get_zone_lpm("mo".as_bytes());
+    let ret = t.get_zone_lpm("moc.elpmaxe.www.bus123".as_bytes());
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+    let ret = t.get_zone_lpm("moc.elpmaxe.www.bus".as_bytes());
     println!("🌹 get_lpm: {:?}\n", ret);
 }
 
