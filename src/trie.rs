@@ -302,7 +302,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     }
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-    pub fn get_zone_lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    pub fn lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
@@ -325,9 +325,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                         if branch.entries.contains(idx) {
                             if branch.entries.entries.len() > 0 {
                                 if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
-                                    // leaf.key_slice().len() <= key.borrow().len() && 
-                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()]
-                                    {
+                                    // leaf.key_slice().len() <= key.borrow().len() &&
+                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
                                         l = Some(&leaf.val);
 
                                         unsafe {
@@ -335,7 +334,6 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                                             libc_print::libc_println!("🐠 val: {:?};", *d);
                                         }
-
                                     }
                                 }
                             }
@@ -350,10 +348,9 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 if exemplar.key_slice().len() == key.borrow().len()
                     && exemplar.key_slice() == key.borrow()
                 {
-
                     unsafe {
                         let d = &exemplar.val as *const V as *const u32;
-    
+
                         libc_print::libc_println!("🐠🐠 val: {:?};", *d);
                     }
 
@@ -386,6 +383,81 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 // }
             }
             None => None,
+        }
+    }
+
+    /// Get an immutable reference to the value associated with a given key, if it is in the tree.
+    pub fn lpm_with_soa<'a, Q: ?Sized>(
+        &'a self,
+        key: &Q,
+        soa_mask: u64,
+    ) -> (Option<&'a V>, Option<&'a V>)
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut count: u32 = 0;
+                let mut shadow_root: &Node<K, V> = root;
+
+                // fqdn
+                let mut right: Option<&'a V> = None;
+
+                // soa zone
+                let mut left: Option<&'a V> = None;
+
+                while let Node::Branch(ref branch) = *shadow_root {
+                    libc_print::libc_println!("🐠 loop count: {};", count);
+                    count += 1;
+                    // ok
+                    // t = branch
+                    //     .entries
+                    //     .get_or_any(crate::util::nybble_index(branch.choice, key.borrow()));
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    shadow_root = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    // leaf.key_slice().len() <= key.borrow().len() &&
+                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                        right = Some(&leaf.val);
+
+                                        unsafe {
+                                            let v = &leaf.val as *const V as *const u64;
+                                            if *v & soa_mask > 0 {
+                                                left = Some(&leaf.val);
+
+                                                libc_print::libc_println!("🐠🐠🐠 soa val: {:?};", *v);
+                                            }
+
+                                            libc_print::libc_println!("🐠 val: {:?};", *v);
+                                        }
+                                    } else {
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
+                if exemplar.key_slice() == key.borrow() {
+                    unsafe {
+                        let d = &exemplar.val as *const V as *const u32;
+
+                        libc_print::libc_println!("🐠🐠 val: {:?};", *d);
+                    }
+
+                    return (left, Some(&exemplar.val));
+                }
+
+                (left, right)
+            }
+            None => (None, None),
         }
     }
 

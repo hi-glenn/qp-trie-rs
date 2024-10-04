@@ -21,7 +21,7 @@ fn test_zone_lpm() {
     // moc
     println!("hello test_zone_lpm");
 
-    let mut t = Trie::<&[u8], u32>::new();
+    let mut t = Trie::<&[u8], u64>::new();
 
     println!("\n moc");
     t.insert("moc".as_bytes(), 1);
@@ -30,16 +30,16 @@ fn test_zone_lpm() {
     t.insert("moc.elpmaxe".as_bytes(), 2);
 
     println!("\n moc.elpmaxe.www");
-    t.insert("moc.elpmaxe.www".as_bytes(), 3);
+    t.insert("moc.elpmaxe.www".as_bytes(), 12);
 
     println!("\n moc.elpmaxe.www.bus");
     t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
 
     println!("\n get_lpm mo");
-    let ret = t.get_zone_lpm("moc.elpmaxe.www.bus123".as_bytes());
+    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus123".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
-    let ret = t.get_zone_lpm("moc.elpmaxe.www.bus".as_bytes());
+    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 }
 
@@ -166,7 +166,7 @@ fn test_get_lpm() {
     t.insert("ab`".as_bytes(), 6);
 
     println!("\n get_lpm cbcef");
-    let ret = t.get_zone_lpm("cbcef".as_bytes());
+    let ret = t.lpm("cbcef".as_bytes());
     println!("🌹 get_lpm: {:?}", ret);
 
     // println!("\n get_lpm ab");
@@ -174,11 +174,11 @@ fn test_get_lpm() {
     // println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n get_lpm abc");
-    let ret = t.get_zone_lpm("abc".as_bytes()); // hit abcd
+    let ret = t.lpm("abc".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n get_lpm ab");
-    let ret = t.get_zone_lpm("ab".as_bytes()); // hit abcd
+    let ret = t.lpm("ab".as_bytes()); // hit abcd
     println!("🌹 get_lpm: {:?}", ret);
 
     println!("\n longest_common abc");

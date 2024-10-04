@@ -39,7 +39,7 @@ impl<T> Sparse<T> {
 
     // Go from a nybble-index to an index in the internal element vector.
     #[inline]
-pub    fn actual(&self, idx: u8) -> usize {
+    pub fn actual(&self, idx: u8) -> usize {
         (self.index & ((1 << idx) - 1)).count_ones() as usize
     }
 
