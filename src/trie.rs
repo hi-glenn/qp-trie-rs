@@ -408,7 +408,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut left: Option<&'a V> = None;
 
                 while let Node::Branch(ref branch) = *shadow_root {
-                    libc_print::libc_println!("🐠 loop count: {};", count);
+                    libc_print::libc_println!("\n🐠 loop count: {};", count);
                     count += 1;
                     // ok
                     // t = branch
@@ -418,9 +418,13 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                     shadow_root = {
                         if branch.entries.contains(idx) {
                             if branch.entries.entries.len() > 0 {
+                                libc_print::libc_println!("🐷 branch.entries.entries.len() > 0;");
                                 if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
                                     // leaf.key_slice().len() <= key.borrow().len() &&
-                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                    // 首先确保不要越界
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                        libc_print::libc_println!("🏀 set right;");
+
                                         right = Some(&leaf.val);
 
                                         unsafe {
@@ -431,9 +435,11 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                                 libc_print::libc_println!("🐠🐠🐠 soa val: {:?};", *v);
                                             }
 
-                                            libc_print::libc_println!("🐠 val: {:?};", *v);
+                                            // libc_print::libc_println!("🐠 val: {:?};", *v);
                                         }
                                     } else {
+                                        libc_print::libc_println!("🥗 ----- early return;");
+                                        return (left, right);
                                     }
                                 }
                             }
@@ -445,7 +451,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 }
 
                 let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
-                if exemplar.key_slice() == key.borrow() {
+                // if exemplar.key_slice() == key.borrow() {
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
                     unsafe {
                         let d = &exemplar.val as *const V as *const u32;
 
@@ -454,6 +461,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                     return (left, Some(&exemplar.val));
                 }
+
+                libc_print::libc_println!("🍊 ------- last;");
 
                 (left, right)
             }

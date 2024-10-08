@@ -27,7 +27,7 @@ fn test_zone_lpm() {
     t.insert("moc".as_bytes(), 1);
 
     println!("\n moc.elpmaxe");
-    t.insert("moc.elpmaxe".as_bytes(), 2);
+    t.insert("moc.elpmaxe".as_bytes(), 11);
 
     println!("\n moc.elpmaxe.www");
     t.insert("moc.elpmaxe.www".as_bytes(), 12);
@@ -36,11 +36,42 @@ fn test_zone_lpm() {
     t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
 
     println!("\n get_lpm mo");
+
+    println!("\n ----------------------");
+
     let ret = t.lpm_with_soa("moc.elpmaxe.www.bus123".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
+    println!("\n ----------------------");
+
     let ret = t.lpm_with_soa("moc.elpmaxe.www.bus".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
+
+    println!("\n ----------------------");
+
+    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus1".as_bytes(), 8);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+    println!("\n ----------------------");
+
+    let ret = t.lpm_with_soa("moc.elpmaxe.www.bu".as_bytes(), 8);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+    println!("\n ----------------------");
+
+    let ret = t.lpm_with_soa("moc.elpmaxe.www789".as_bytes(), 8);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+    println!("\n ----------------------");
+    
+    let ret = t.lpm_with_soa("moc.elpmaxe.www.".as_bytes(), 1);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+    println!("\n ----------------------");
+
+    let ret = t.lpm_with_soa("moc.elpmaxe.ww".as_bytes(), 1);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
 }
 
 // 左 4 不同，右 4 相同
