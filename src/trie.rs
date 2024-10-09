@@ -387,7 +387,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     }
 
     /// Get an immutable reference to the value associated with a given key, if it is in the tree.
-    pub fn lpm_with_soa<'a, Q: ?Sized>(
+    pub fn lpm_with_mask<'a, Q: ?Sized>(
         &'a self,
         key: &Q,
         soa_mask: u64,

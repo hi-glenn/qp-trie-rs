@@ -39,37 +39,37 @@ fn test_zone_lpm() {
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus123".as_bytes(), 8);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus123".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus".as_bytes(), 8);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.www.bus1".as_bytes(), 8);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus1".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.www.bu".as_bytes(), 8);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bu".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.www789".as_bytes(), 8);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www789".as_bytes(), 8);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
     
-    let ret = t.lpm_with_soa("moc.elpmaxe.www.".as_bytes(), 1);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.".as_bytes(), 1);
     println!("🌹 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_soa("moc.elpmaxe.ww".as_bytes(), 1);
+    let ret = t.lpm_with_mask("moc.elpmaxe.ww".as_bytes(), 1);
     println!("🌹 get_lpm: {:?}\n", ret);
 
 }
