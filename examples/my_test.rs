@@ -11,7 +11,9 @@ fn main() {
 
     // test_get_lpm3();
 
-    test_zone_lpm();
+    test_zone_lpm4();
+
+    // test_zone_lpm();
 }
 
 fn test_zone_lpm() {
@@ -74,6 +76,22 @@ fn test_zone_lpm() {
 
 }
 
+fn test_zone_lpm4() {
+    // moc.elpmaxe.www.bus
+    // moc.elpmaxe.www
+    // moc.elpmaxe
+    // moc
+    println!("hello test_zone_lpm");
+
+    let mut t = Trie::<&[u8], u64>::new();
+
+    println!("\n moc");
+    t.insert("moc".as_bytes(), 1);
+
+    let ret = t.lpm_with_mask("moc.elpmaxe.ww".as_bytes(), 1);
+    println!("🌹 get_lpm: {:?}\n", ret);
+
+}
 // 左 4 不同，右 4 相同
 fn test_get_lpm3() {
     let mut t = Trie::<&[u8], u32>::new();
