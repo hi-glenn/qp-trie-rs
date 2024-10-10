@@ -327,7 +327,9 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                             if branch.entries.entries.len() > 0 {
                                 if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
                                     // leaf.key_slice().len() <= key.borrow().len() &&
-                                    if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                    // if leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] 
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()]
+                                    {
                                         l = Some(&leaf.val);
 
                                         unsafe {
@@ -346,8 +348,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 }
 
                 let exemplar = unsafe { t.unwrap_leaf_ref() };
-                if exemplar.key_slice().len() == key.borrow().len()
-                    && exemplar.key_slice() == key.borrow()
+                // if exemplar.key_slice().len() == key.borrow().len() && exemplar.key_slice() == key.borrow()
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()]
                 {
                     unsafe {
                         let d = &exemplar.val as *const V as *const u32;
