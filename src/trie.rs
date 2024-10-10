@@ -234,6 +234,120 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
+    /// Get a immutable reference to the value corresponding to the longest common prefix
+    #[inline(always)]
+    pub fn lpm<'a, Q: ?Sized>(
+        &'a self,
+        key: &Q,
+    ) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut shadow_root: &Node<K, V> = root;
+
+                // fqdn
+                let mut right: Option<&'a V> = None;
+
+                while let Node::Branch(ref branch) = *shadow_root {
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    shadow_root = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    // 首先确保不要越界
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                        right = Some(&leaf.val);
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
+                    return Some(&exemplar.val);
+                }
+
+                right
+            }
+            None => None,
+        }
+    }
+
+    /// Get a immutable reference to the value corresponding to the longest common prefix with mask
+    #[inline(always)]
+    pub fn lpm_with_mask<'a, Q: ?Sized>(
+        &'a self,
+        key: &Q,
+        mask: u64,
+    ) -> (Option<&'a V>, Option<&'a V>)
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut shadow_root: &Node<K, V> = root;
+
+                // fqdn
+                let mut right: Option<&'a V> = None;
+
+                // zone with specified mask
+                let mut left: Option<&'a V> = None;
+
+                while let Node::Branch(ref branch) = *shadow_root {
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    shadow_root = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    // 首先确保不要越界
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+
+                                        right = Some(&leaf.val);
+
+                                        unsafe {
+                                            let v = &leaf.val as *const V as *const u64;
+                                            if *v & mask > 0 {
+                                                left = Some(&leaf.val);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
+                    unsafe {
+                        let v = &exemplar.val as *const V as *const u64;
+                        if *v & mask > 0 {
+                            left = Some(&exemplar.val);
+                        }
+                    }
+                    return (left, Some(&exemplar.val));
+                }
+
+                (left, right)
+            }
+            None => (None, None),
+        }
+    }
+
     /// Get the longest common prefix of all the nodes in the trie and the given key.
     pub fn longest_common_prefix<'a, Q: ?Sized>(&'a self, key: &Q) -> &'a K::Split
     where
