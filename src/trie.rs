@@ -282,13 +282,13 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
-    /// Get a immutable reference to the value corresponding to the longest common prefix with mask
+    /// (soa, (fqdn, key_len)) Get a immutable reference to the value corresponding to the longest common prefix with mask
     #[inline(always)]
     pub fn lpm_with_mask<'a, Q: ?Sized>(
         &'a self,
         key: &Q,
         mask: u64,
-    ) -> (Option<&'a V>, Option<&'a V>)
+    ) -> (Option<&'a V>, Option<(&'a V, usize)>)
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
@@ -298,7 +298,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut shadow_root: &Node<K, V> = root;
 
                 // fqdn
-                let mut right: Option<&'a V> = None;
+                let mut right: Option<(&'a V, usize)> = None;
 
                 // zone with specified mask
                 let mut left: Option<&'a V> = None;
@@ -313,7 +313,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                     // 首先确保不要越界
                                     if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
 
-                                        right = Some(&leaf.val);
+                                        right = Some((&leaf.val, leaf.key_slice().len()));
 
                                         unsafe {
                                             let v = &leaf.val as *const V as *const u64;
@@ -339,7 +339,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                             left = Some(&exemplar.val);
                         }
                     }
-                    return (left, Some(&exemplar.val));
+                    return (left, Some((&exemplar.val, exemplar.key_slice().len())));
                 }
 
                 (left, right)

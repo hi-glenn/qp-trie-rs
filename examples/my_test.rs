@@ -11,9 +11,9 @@ fn main() {
 
     // test_get_lpm3();
 
-    test_zone_lpm4();
+    // test_zone_lpm4();
 
-    // test_zone_lpm();
+    test_zone_lpm();
 }
 
 fn test_zone_lpm() {
@@ -25,54 +25,54 @@ fn test_zone_lpm() {
 
     let mut t = Trie::<&[u8], u64>::new();
 
-    println!("\n moc");
-    t.insert("moc".as_bytes(), 1);
+    println!("\n moc.");
+    t.insert("moc.".as_bytes(), 1);
 
-    println!("\n moc.elpmaxe");
-    t.insert("moc.elpmaxe".as_bytes(), 11);
+    println!("\n moc.elpmaxe.");
+    t.insert("moc.elpmaxe.".as_bytes(), 11);
 
-    println!("\n moc.elpmaxe.www");
-    t.insert("moc.elpmaxe.www".as_bytes(), 12);
+    println!("\n moc.elpmaxe.www.");
+    t.insert("moc.elpmaxe.www.".as_bytes(), 12);
 
-    println!("\n moc.elpmaxe.www.bus");
-    t.insert("moc.elpmaxe.www.bus".as_bytes(), 4);
+    println!("\n moc.elpmaxe.www.bus.");
+    t.insert("moc.elpmaxe.www.bus.".as_bytes(), 4);
 
     println!("\n get_lpm mo");
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus123".as_bytes(), 8);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus123.".as_bytes(), 8);
+    println!("🌹1 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus".as_bytes(), 8);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus.".as_bytes(), 8);
+    println!("🌹2 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus1".as_bytes(), 8);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bus1.".as_bytes(), 8);
+    println!("🌹3 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.www.bu".as_bytes(), 8);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www.bu.".as_bytes(), 8);
+    println!("🌹4 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.www789".as_bytes(), 8);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.www789.".as_bytes(), 8);
+    println!("🌹5 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
     
     let ret = t.lpm_with_mask("moc.elpmaxe.www.".as_bytes(), 1);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    println!("🌹6 get_lpm: {:?}\n", ret);
 
     println!("\n ----------------------");
 
-    let ret = t.lpm_with_mask("moc.elpmaxe.ww".as_bytes(), 1);
-    println!("🌹 get_lpm: {:?}\n", ret);
+    let ret = t.lpm_with_mask("moc.elpmaxe.ww.".as_bytes(), 1);
+    println!("🌹7 get_lpm: {:?}\n", ret);
 
 }
 
@@ -86,7 +86,7 @@ fn test_zone_lpm4() {
     let mut t = Trie::<&[u8], u64>::new();
 
     println!("\n moc");
-    t.insert("moc".as_bytes(), 1);
+    t.insert("moc.".as_bytes(), 1);
 
     let ret = t.lpm_with_mask("moc.elpmaxe.ww".as_bytes(), 1);
     println!("🌹 get_lpm: {:?}\n", ret);
