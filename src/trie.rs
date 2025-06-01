@@ -1,4 +1,5 @@
 use alloc::borrow::ToOwned;
+use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::fmt;
 use core::iter::FromIterator;
@@ -234,6 +235,108 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
+    /// Get a immutable reference to the value corresponding to the longest common prefix
+    #[inline(always)]
+    pub fn find_top_zone<'a, Q: ?Sized>(
+        &'a self,
+        key: &Q,
+    ) -> Option<(usize, &'a V)>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut shadow_root: &Node<K, V> = root;
+
+                // fqdn
+                let mut right: Option<(usize, &'a V)> = None;
+
+                while let Node::Branch(ref branch) = *shadow_root {
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    shadow_root = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    // 首先确保不要越界
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                        right = Some((leaf.key_slice().len(), &leaf.val));
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
+                    return Some((exemplar.key_slice().len(), &exemplar.val));
+                }
+
+                right
+            }
+            None => None,
+        }
+    }
+    
+    /// Get a immutable reference to the value corresponding to the longest common prefix
+    #[inline(always)]
+    pub fn find_sub_zone<'a, Q: ?Sized>(
+        &'a self,
+        key: &Q,
+        mask: u64,
+    ) -> (Vec<(&'a V, usize)>, Option<(&'a V, usize)>) // Option<&'a V> // (Option<(&'a V, usize)>, Option<(&'a V, usize)>); (Option<&'a [(&'a V, usize)]>, Option<(&'a V, usize)>)
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        let mut sub_zones = Vec::<(&'a V, usize)>::with_capacity(100);
+
+        match self.root.as_ref() {
+            Some(root) => {
+                let mut shadow_root: &Node<K, V> = root;
+
+                while let Node::Branch(ref branch) = *shadow_root {
+
+                    let idx = crate::util::nybble_index(branch.choice, key.borrow());
+                    shadow_root = {
+                        if branch.entries.contains(idx) {
+                            if branch.entries.entries.len() > 0 {
+                                if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
+                                    // 首先确保不要越界
+                                    if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
+                                        unsafe {
+                                            let v = &leaf.val as *const V as *const u64;
+                                            if *v & mask > 0 {
+                                                return (sub_zones, Some((&leaf.val, leaf.key_slice().len())));
+                                            }
+                                        }
+                                        sub_zones.push((&leaf.val, leaf.key_slice().len()));
+                                    }
+                                }
+                            }
+                            &branch.entries.entries[branch.entries.actual(idx)]
+                        } else {
+                            &branch.entries.entries[0]
+                        }
+                    }
+                }
+
+                let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
+                if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
+                    sub_zones.push((&exemplar.val, exemplar.key_slice().len()));
+                }
+
+                (sub_zones, None)
+            }
+            None => (sub_zones, None),
+        }
+    }
+    
     /// Get a immutable reference to the value corresponding to the longest common prefix
     #[inline(always)]
     pub fn lpm<'a, Q: ?Sized>(
