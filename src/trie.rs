@@ -240,7 +240,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
     pub fn find_top_zone<'a, Q: ?Sized>(
         &'a self,
         key: &Q,
-    ) -> Option<(usize, &'a V)>
+    ) -> Option<(&'a V, usize)>
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
@@ -250,7 +250,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut shadow_root: &Node<K, V> = root;
 
                 // fqdn
-                let mut right: Option<(usize, &'a V)> = None;
+                let mut last_zone: Option<(&'a V, usize)> = None;
 
                 while let Node::Branch(ref branch) = *shadow_root {
 
@@ -261,7 +261,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                 if let Node::Leaf(ref leaf) = branch.entries.entries[0] {
                                     // 首先确保不要越界
                                     if leaf.key_slice().len() <= key.borrow().len() && leaf.key_slice() == &key.borrow()[..leaf.key_slice().len()] {
-                                        right = Some((leaf.key_slice().len(), &leaf.val));
+                                        last_zone = Some((&leaf.val, leaf.key_slice().len()));
                                     }
                                 }
                             }
@@ -274,10 +274,10 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
                 if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
-                    return Some((exemplar.key_slice().len(), &exemplar.val));
+                    return Some((&exemplar.val, exemplar.key_slice().len()));
                 }
 
-                right
+                last_zone
             }
             None => None,
         }
@@ -289,16 +289,20 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         &'a self,
         key: &Q,
         mask: u64,
-    ) -> (Vec<(&'a V, usize)>, Option<(&'a V, usize)>) // Option<&'a V> // (Option<(&'a V, usize)>, Option<(&'a V, usize)>); (Option<&'a [(&'a V, usize)]>, Option<(&'a V, usize)>)
+    ) -> (Option<(&'a V, usize)>, Option<(&'a V, usize)>, Option<(&'a V, usize)>) // Option<&'a V> // (Option<(&'a V, usize)>, Option<(&'a V, usize)>); (Option<&'a [(&'a V, usize)]>, Option<(&'a V, usize)>)
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
     {
-        let mut sub_zones = Vec::<(&'a V, usize)>::with_capacity(100);
-
         match self.root.as_ref() {
             Some(root) => {
                 let mut shadow_root: &Node<K, V> = root;
+
+                // last zone
+                let mut last_zone: Option<(&'a V, usize)> = None;
+
+                // second to last zone
+                let mut second_to_last_zone: Option<(&'a V, usize)> = None;
 
                 while let Node::Branch(ref branch) = *shadow_root {
 
@@ -312,10 +316,11 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                         unsafe {
                                             let v = &leaf.val as *const V as *const u64;
                                             if *v & mask > 0 {
-                                                return (sub_zones, Some((&leaf.val, leaf.key_slice().len())));
+                                                return (None, None, Some((&leaf.val, leaf.key_slice().len())));
                                             }
                                         }
-                                        sub_zones.push((&leaf.val, leaf.key_slice().len()));
+                                        second_to_last_zone = last_zone;
+                                        last_zone = Some((&leaf.val, leaf.key_slice().len()));
                                     }
                                 }
                             }
@@ -328,12 +333,13 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
                 if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
-                    sub_zones.push((&exemplar.val, exemplar.key_slice().len()));
+                    second_to_last_zone = last_zone;
+                    last_zone = Some((&exemplar.val, exemplar.key_slice().len()));
                 }
 
-                (sub_zones, None)
+                (second_to_last_zone, last_zone, None)
             }
-            None => (sub_zones, None),
+            None => (None, None, None),
         }
     }
     
