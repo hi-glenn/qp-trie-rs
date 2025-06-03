@@ -85,10 +85,19 @@ fn test_top_zone() {
     top_zone.insert("1ab".as_bytes().to_vec(), (18, Trie::new())); // ----
 
 
-    let ret = top_zone.find_top_zone("1abllll".as_bytes());
+    let ret = top_zone.find_top_zone("1abd".as_bytes());
     println!("🌹7 get_lpm: {:?}\n", ret);
 
-    assert_eq!(top_zone.find_top_zone("moc.elpmaxe.ww.".as_bytes()), Some((&(11, Trie::<Vec<u8>, [u64; 2]>::new()), 12)), "-----");
+    
+    assert_eq!(top_zone.find_top_zone("1abb".as_bytes()), Some((&(2, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+
+    assert_eq!(top_zone.find_top_zone("1abc".as_bytes()), Some((&(3, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+
+    assert_eq!(top_zone.find_top_zone("1abd".as_bytes()), Some((&(4, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+
+    assert_eq!(top_zone.find_top_zone("1abllll".as_bytes()), Some((&(121, Trie::<Vec<u8>, [u64; 2]>::new()), 5)), "");
+
+    assert_eq!(top_zone.find_top_zone("moc.elpmaxe.ww.".as_bytes()), Some((&(11, Trie::<Vec<u8>, [u64; 2]>::new()), 12)), "");
 
 }
 
