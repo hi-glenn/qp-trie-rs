@@ -18,10 +18,11 @@ fn main() {
     // test_zone_lpm();
 
     test_top_zone();
+
+    test_get_lpm3();
 }
 
 fn test_top_zone() {
-
     let mut top_zone = Trie::<Vec<u8>, (u64, Trie<Vec<u8>, [u64; 2]>)>::new();
 
     top_zone.insert("moc.".as_bytes().to_vec(), (1, Trie::new()));
@@ -84,21 +85,38 @@ fn test_top_zone() {
     println!("\n1ab");
     top_zone.insert("1ab".as_bytes().to_vec(), (18, Trie::new())); // ----
 
-
     let ret = top_zone.find_top_zone("1abd".as_bytes());
     println!("🌹7 get_lpm: {:?}\n", ret);
 
-    
-    assert_eq!(top_zone.find_top_zone("1abb".as_bytes()), Some((&(2, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+    assert_eq!(
+        top_zone.find_top_zone("1abb".as_bytes()),
+        Some((&(2, Trie::<Vec<u8>, [u64; 2]>::new()), 4)),
+        ""
+    );
 
-    assert_eq!(top_zone.find_top_zone("1abc".as_bytes()), Some((&(3, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+    assert_eq!(
+        top_zone.find_top_zone("1abc".as_bytes()),
+        Some((&(3, Trie::<Vec<u8>, [u64; 2]>::new()), 4)),
+        ""
+    );
 
-    assert_eq!(top_zone.find_top_zone("1abd".as_bytes()), Some((&(4, Trie::<Vec<u8>, [u64; 2]>::new()), 4)), "");
+    assert_eq!(
+        top_zone.find_top_zone("1abd".as_bytes()),
+        Some((&(4, Trie::<Vec<u8>, [u64; 2]>::new()), 4)),
+        ""
+    );
 
-    assert_eq!(top_zone.find_top_zone("1abllll".as_bytes()), Some((&(121, Trie::<Vec<u8>, [u64; 2]>::new()), 5)), "");
+    assert_eq!(
+        top_zone.find_top_zone("1abllll".as_bytes()),
+        Some((&(121, Trie::<Vec<u8>, [u64; 2]>::new()), 5)),
+        ""
+    );
 
-    assert_eq!(top_zone.find_top_zone("moc.elpmaxe.ww.".as_bytes()), Some((&(11, Trie::<Vec<u8>, [u64; 2]>::new()), 12)), "");
-
+    assert_eq!(
+        top_zone.find_top_zone("moc.elpmaxe.ww.".as_bytes()),
+        Some((&(11, Trie::<Vec<u8>, [u64; 2]>::new()), 12)),
+        ""
+    );
 }
 
 fn test_zone_lpm() {
@@ -177,6 +195,7 @@ fn test_zone_lpm4() {
     let ret = t.lpm_with_mask("moc.elpmaxe.ww".as_bytes(), 1);
     println!("🌹 get_lpm: {:?}\n", ret);
 }
+
 // 左 4 不同，右 4 相同
 fn test_get_lpm3() {
     let mut t = Trie::<&[u8], u32>::new();
@@ -196,9 +215,11 @@ fn test_get_lpm3() {
     println!("\n1q"); // 0x71
     t.insert("1q".as_bytes(), 4);
 
-    println!("\n--------------");
-    let ret = t.get("1b".as_bytes());
-    println!("🍟 get: {:?}", ret);
+    assert_eq!(t.get("1b".as_bytes()), Some(&5), "1b");
+    assert_eq!(t.get("1A".as_bytes()), Some(&1), "1A");
+    assert_eq!(t.get("1Q".as_bytes()), Some(&2), "1Q");
+    assert_eq!(t.get("1a".as_bytes()), Some(&3), "1a");
+    assert_eq!(t.get("1q".as_bytes()), Some(&4), "1q");
 }
 
 // 左 4 相同，右 4 不同
