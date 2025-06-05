@@ -319,7 +319,15 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                                 return (None, None, Some((&leaf.val, leaf.key_slice().len())));
                                             }
                                         }
-                                        second_to_last_zone = last_zone;
+
+                                        if let Some((m, _)) = last_zone {
+                                            unsafe {
+                                                if *(m as *const V as *const u64).offset(1)  > 0 {
+                                                    second_to_last_zone = last_zone;
+                                                }
+                                            }
+                                        }
+                                        // second_to_last_zone = last_zone;
                                         last_zone = Some((&leaf.val, leaf.key_slice().len()));
                                     }
                                 }
@@ -333,7 +341,14 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
                 if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
-                    second_to_last_zone = last_zone;
+                    // second_to_last_zone = last_zone;
+                    if let Some((m, _)) = last_zone {
+                        unsafe {
+                            if *(m as *const V as *const u64).offset(1)  > 0 {
+                                second_to_last_zone = last_zone;
+                            }
+                        }
+                    }
                     last_zone = Some((&exemplar.val, exemplar.key_slice().len()));
                 }
 

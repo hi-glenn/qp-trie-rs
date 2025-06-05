@@ -70,7 +70,7 @@ fn sub_zone_test() {
 
     assert_eq!(
         top_zone.find_sub_zone("moc.elpmaxe.x.hello.".as_bytes(), _RTYPE_MASK_3),
-        (Some((&[0, 0], 12)), Some((&[1, 1], 14)), None),
+        (None, Some((&[1, 1], 14)), None),
         ""
     );
 
