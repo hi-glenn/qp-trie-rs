@@ -37,8 +37,8 @@ fn sub_zone_test() {
     top_zone.insert("moc.elpmaxe.ali.8".as_bytes().to_vec(), [5, 5]);
 
     top_zone.insert("moc.elpmaxe.x.".as_bytes().to_vec(), [1, 1]);
-    top_zone.insert("moc.elpmaxe.x.1.".as_bytes().to_vec(), [2, 2]);
-    top_zone.insert("moc.elpmaxe.x.1.2.".as_bytes().to_vec(), [3, 3]);
+    top_zone.insert("moc.elpmaxe.x.1.".as_bytes().to_vec(), [2, 0]);
+    top_zone.insert("moc.elpmaxe.x.1.2.".as_bytes().to_vec(), [3, 0]);
     top_zone.insert("moc.elpmaxe.x.1.2.3.".as_bytes().to_vec(), [4, 4]);
 
     let ret = top_zone.find_sub_zone("moc.elpmaxe.ali.8.9.".as_bytes(), _RTYPE_MASK_3);
@@ -52,19 +52,19 @@ fn sub_zone_test() {
 
     assert_eq!(
         top_zone.find_sub_zone("moc.elpmaxe.x.1.2.3.".as_bytes(), _RTYPE_MASK_3),
-        (Some((&[3, 3], 18)), Some((&[4, 4], 20)), None),
+        (Some((&[1, 1], 14)), Some((&[4, 4], 20)), None),
         ""
     );
 
     assert_eq!(
         top_zone.find_sub_zone("moc.elpmaxe.x.1.2.3.4.".as_bytes(), _RTYPE_MASK_3),
-        (Some((&[3, 3], 18)), Some((&[4, 4], 20)), None),
+        (Some((&[1, 1], 14)), Some((&[4, 4], 20)), None),
         ""
     );
 
     assert_eq!(
         top_zone.find_sub_zone("moc.elpmaxe.x.1.xdfdfsdfsd.".as_bytes(), _RTYPE_MASK_3),
-        (Some((&[1, 1], 14)), Some((&[2, 2], 16)), None),
+        (Some((&[1, 1], 14)), Some((&[2, 0], 16)), None),
         ""
     );
 
