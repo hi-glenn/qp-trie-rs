@@ -289,7 +289,7 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         &'a self,
         key: &Q,
         mask: u64,
-    ) -> (Option<(&'a V, usize)>, Option<(&'a V, usize)>, Option<(&'a V, usize)>) // Option<&'a V> // (Option<(&'a V, usize)>, Option<(&'a V, usize)>); (Option<&'a [(&'a V, usize)]>, Option<(&'a V, usize)>)
+    ) -> (Option<(&'a V, usize)>, Option<(&'a V, usize)>, Option<(&'a V, usize)>)
     where
         K: Borrow<Q>,
         Q: Borrow<[u8]>,
@@ -298,6 +298,10 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
             Some(root) => {
                 let mut shadow_root: &Node<K, V> = root;
 
+                // let mut count = 0;
+                // let mut count2 = 0;
+                // let mut count3 = 0;
+
                 // last zone
                 let mut last_zone: Option<(&'a V, usize)> = None;
 
@@ -305,6 +309,8 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                 let mut second_to_last_zone: Option<(&'a V, usize)> = None;
 
                 while let Node::Branch(ref branch) = *shadow_root {
+                    // count3 +=1;
+                    // libc_print::libc_println!("🥎 count3: {};", count3);
 
                     let idx = crate::util::nybble_index(branch.choice, key.borrow());
                     shadow_root = {
@@ -324,14 +330,18 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
                                             unsafe {
                                                 if *(m as *const V as *const u64).offset(1)  > 0 {
                                                     second_to_last_zone = last_zone;
+                                                    // count+=1;
+                                                    // libc_print::libc_println!("🐷 second_to_last_zone count: {};", count);
                                                 }
                                             }
                                         }
-                                        // second_to_last_zone = last_zone;
                                         last_zone = Some((&leaf.val, leaf.key_slice().len()));
+                                        // count2+=1;
+                                        // libc_print::libc_println!("🥝 last_zone count: {}; entries.actual: {}", count2, branch.entries.actual(idx));
                                     }
                                 }
                             }
+                            // libc_print::libc_println!("🥝🥝🥝🥝🥝: {}", branch.entries.actual(idx));
                             &branch.entries.entries[branch.entries.actual(idx)]
                         } else {
                             &branch.entries.entries[0]
@@ -341,15 +351,26 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
 
                 let exemplar = unsafe { shadow_root.unwrap_leaf_ref() };
                 if exemplar.key_slice().len() <= key.borrow().len() && exemplar.key_slice() == &key.borrow()[..exemplar.key_slice().len()] {
-                    // second_to_last_zone = last_zone;
-                    if let Some((m, _)) = last_zone {
+                    unsafe {
+                        let v = &exemplar.val as *const V as *const u64;
+                        if *v & mask > 0 {
+                            // libc_print::libc_println!("🐠🐠🐠🐠🐠 second_to_last_zone count: ;");
+                            return (None, None, Some((&exemplar.val, exemplar.key_slice().len())));
+                        }
+                    }
+
+                    if let Some((m, leaf_len)) = last_zone {
                         unsafe {
-                            if *(m as *const V as *const u64).offset(1)  > 0 {
+                            if leaf_len != exemplar.key_slice().len() && *(m as *const V as *const u64).offset(1)  > 0 {
                                 second_to_last_zone = last_zone;
+                                // count+=1;
+                                // libc_print::libc_println!("🐠 second_to_last_zone count: {};", count);
                             }
                         }
                     }
                     last_zone = Some((&exemplar.val, exemplar.key_slice().len()));
+                    // count2+=1;
+                    // libc_print::libc_println!("🍏 last_zone count: {};", count2);
                 }
 
                 (second_to_last_zone, last_zone, None)
