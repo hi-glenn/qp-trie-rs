@@ -143,6 +143,27 @@ fn sub_zone_test_3() {
 }
 
 /// NS
+/// save: 2.1.a.com; *.2.1.a.com
+/// find: 7.2.1.a.com
+#[test]
+fn sub_zone_test_3_1() {
+    let mut top_zone = Trie::<Vec<u8>, [u64; 2]>::new();
+    // top_zone.insert("moc.a.1.".as_bytes().to_vec(), [0x800000001, 2]);
+    top_zone.insert("moc.a.1.2.".as_bytes().to_vec(), [0x800000001, 1]);
+
+    assert_eq!(
+        top_zone.find_sub_zone(("moc.a.1.2.3.").as_bytes(), _RTYPE_MASK_3),
+        (None, None, Some((&[34359738369, 1], 10))),
+        ""
+    );
+
+    assert_eq!(
+        top_zone.find_sub_zone(("moc.a.1.2.").as_bytes(), _RTYPE_MASK_3),
+        (None, None, Some((&[34359738369, 1], 10))),
+        ""
+    );
+}
+
 /// save: *.1.a.com; *.2.1.a.com
 /// find: 3.2.1.a.com; 4.2.1.a.com; 2.1.a.com; 1.a.com; 7.1.a.com; 7.2.a.com;
 #[test]
