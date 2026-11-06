@@ -1,75 +1,55 @@
-# fast_radix_trie vs rart：LPM / 插入基准结果
+# fast_radix_trie vs rart vs qp-trie：LPM / 插入 / 内存基准结果
 
 ## 环境与口径
 
 | 项 | 值 |
 |---|---|
 | CPU | Intel Xeon E5-2630 v2（Ivy Bridge，无 AVX2），`taskset -c 6` 单核绑定 |
-| 编译 | `RUSTFLAGS="-C target-cpu=native"`，`--release` / `bench` profile |
-| 工具链 | rustc 1.99.1，criterion 0.8.2（关闭 plotters/rayon） |
-| 被比较库 | `fast_radix_trie 1.2.0`（`RadixMap<u64>`）、`rart 0.11.0`（`AdaptiveRadixTree<VectorKey, u64>`，默认 `simd_keys`） |
-| 数据集 | `majestic_million.txt`，1,000,000 条域名，全部唯一、小写 |
-| key 形式 | 标签逆序 + 结尾点，如 `google.com` → `com.google.`；累计 key 字节 15,704,346 |
+| 编译 | `RUSTFLAGS="-C target-cpu=native"`，rustc 1.99.1，criterion 0.8.2 默认 `bench` profile |
+| 被比较实现 | `fast_radix_trie 1.2.0`（`RadixMap<u64>`）、`rart 0.11.0`（`AdaptiveRadixTree<VectorKey, u64>`）、本分支 qp-trie（`Trie<Vec<u8>, u64>` + 新增 `lpm`，path 依赖） |
+| 数据集 | `majestic_million.txt` 的 1,000,000 条唯一小写域名，key 为标签逆序加尾点（`google.com` → `com.google.`），累计 15,704,346 字节 |
 | value | 行号 1..=1,000,000 |
-| 统计方式 | 每组跑 3 轮，取中位数；表内为吞吐（次/秒）与折算的单次耗时 |
+| 统计 | 每组 3 轮取中位数 |
 
-查询接口：fast_radix 用 `get_longest_common_prefix`（返回匹配前缀切片 + value，基准只取 value），rart 用 `longest_prefix_value_bytes`（只返回值）。两者都返回“最深且带 value 的节点”，热路径均无堆分配。
+查询接口分别为 `get_longest_common_prefix`、`longest_prefix_value_bytes`、`lpm`，语义一致：返回最深且带 value 的前缀节点，热路径均无堆分配。
 
-## LPM 查找吞吐（次/秒）
+## LPM 查找（次/秒）
 
-| 场景 | fast_radix | rart | rart / fast | 单次耗时 fast_radix | 单次耗时 rart |
-|---|---:|---:|---:|---:|---:|
-| 随机已存在（1024 条/迭代） | 717,580 | 1,039,700 | 1.45× | 1.394 µs | 0.962 µs |
-| 随机不存在（1024 条/迭代） | 12,779,000 | 22,678,000 | 1.77× | 78.25 ns | 44.10 ns |
-| 单条已存在（`com.google.`） | 4,265,000 | 5,980,000 | 1.40× | 234.45 ns | 167.21 ns |
-| 单条不存在 | 22,119,000 | 34,934,000 | 1.58× | 45.21 ns | 28.63 ns |
+| 场景 | fast_radix | rart | qp-trie | 单次耗时 fast / rart / qp |
+|---|---:|---:|---:|---:|
+| 随机已存在（1024 条/迭代） | 744,024 | 1,149,877 | **1,406,362** | 1344.0 / 869.7 / 711.1 ns |
+| 随机不存在（1024 条/迭代） | 14,236,855 | **24,405,939** | 6,888,201 | 70.2 / 41.0 / 145.2 ns |
+| 单条已存在（`com.google.`） | 4,318,162 | 5,178,664 | **7,344,301** | 231.6 / 193.1 / 136.2 ns |
+| 单条不存在 | 23,837,334 | **36,119,338** | 25,310,048 | 42.0 / 27.7 / 39.5 ns |
 
-三轮波动范围（次/秒）：
+- 随机组查询集 102,400 条（100 × 1024），迭代时按 1024 条连续推进窗口，`Throughput::Elements(1024)`；"已存在"为完整存储 key，"不存在"在计时前已断言三方均返回 `None`。
+- 随机组单次耗时高于单条组，主因是 100 万 key（远超 15 MB L3）造成的缓存缺失。
+- qp-trie 在 miss 上偏慢：沿完整 nybble 路径下潜到叶子后才比对，不提前终止；命中路径则因节点内 key 切片局部性更好而占优。
+- 三轮波动均 ≤6%，多数 ≤3%。
 
-| 场景 | fast_radix | rart |
-|---|---|---|
-| 随机已存在 | 702.4 K – 745.9 K | 1.029 M – 1.108 M |
-| 随机不存在 | 12.41 M – 13.79 M | 22.33 M – 24.26 M |
-| 单条已存在 | 4.20 M – 4.28 M | 5.85 M – 6.05 M |
-| 单条不存在 | 21.36 M – 22.31 M | 34.42 M – 35.32 M |
+## 建树插入
 
-- “随机”组的查询集为 102,400 条（= 100 × 1024），迭代时按 1024 条连续推进窗口，`Throughput::Elements(1024)`。
-- “已存在”查询全部为完整存储 key（终点命中，LPM 结果即该 key 本身）；“不存在”查询在计时前已断言两个实现均返回 `None`。
-- 随机组单次耗时高于单条组，是 100 万 key（远超 15 MB L3）造成的缓存缺失，属于预期。
-
-## 建树插入吞吐（次/秒）
-
-| 场景 | fast_radix | rart | rart / fast |
+| 场景 | fast_radix | rart | qp-trie |
 |---|---:|---:|---:|
-| 全量插入 1,000,000 条 | 838,970 次/s（总 1.192 s） | 1,233,300 次/s（总 0.811 s） | 1.47× |
-| 折算单条 | 1191.9 ns | 810.8 ns | — |
+| 全量插入 1,000,000 条 | 976,943 次/s（1.0236 s） | **1,214,500 次/s（0.8234 s）** | 949,000 次/s（1.0537 s） |
 
-三轮原始总耗时：
-
-| 轮次 | fast_radix | rart |
-|---|---|---|
-| 1 | 1.043 s | 0.818 s |
-| 2 | 1.192 s | 0.811 s |
-| 3 | 1.200 s | 0.809 s |
-
-fast_radix 后两轮明显偏高且置信区间宽（缓存/分配器状态影响），rart 三轮稳定。因此插入项建议按 0.839 M–0.959 M 次/s 看待。
+三者轮间波动均 ≤2%。
 
 ## 内存占用（建树完成后）
 
-| 指标 | fast_radix | rart | 比值 |
+| 指标 | fast_radix | rart | qp-trie |
 |---|---:|---:|---:|
-| VmHWM（峰值） | 62.81 MiB | 185.44 MiB | 2.95× |
-| VmRSS（结束时常驻） | 62.81 MiB | 185.44 MiB | 2.95× |
-| 累计 key 字节 | 15,704,346 | 15,704,346 | — |
+| 峰值 / 结束时常驻（VmHWM / VmRSS） | **62.62 MiB** | 185.44 MiB | 108.75 MiB |
 
-测量方式：独立进程流式逐行读取数据集，反转后立即插入并释放输入行（不驻留全量输入），进程结束前读 `/proc/self/status`。rart 的 key 以 owned `VectorKey` 存入树内，字节计入其内存；fast_radix 则把 key 字节拷贝进节点。
+测量方式：独立进程流式逐行读取数据集，反转后立即插入并释放输入行，进程结束前读 `/proc/self/status`；两个字段数值相同，故合并展示。rart 的 `VectorKey` 与 qp-trie 的 `Vec<u8>` 由树接管，fast_radix 把 key 字节拷贝进节点，三者 key 字节均计入。
 
 ## 结论
 
-1. 查找：rart 在四种场景下快 1.40×–1.77×；已存在随机查询（最接近真实 DNS 命中场景）为 1.45×。
-2. 插入：rart 快约 1.47×，但 fast_radix 数据波动更大。
-3. 内存：fast_radix 仅为 rart 的约 1/3，是二者最显著的取舍点。
-4. 口径差异：插入时 rart 直接移交 owned key（无拷贝），fast_radix 从借用切片拷贝字节，这是各库自然 API 形态，不是逐字节等价的工作量。
+1. 命中查找：qp-trie 最快，随机命中为 fast_radix 的 1.89×、rart 的 1.22×，单条命中为 fast_radix 的 1.70×。
+2. 未命中查找：rart 最快，fast_radix 次之，qp-trie 最慢（随机 miss 仅为 fast_radix 的 0.48×）。
+3. 插入：rart 最快，fast_radix 与 qp-trie 接近。
+4. 内存：fast_radix 最省，qp-trie 居中，rart 最高（约为 fast_radix 的 3×）。
+5. 口径差异：插入侧 rart 与 qp-trie 移交 owned key、fast_radix 拷贝借用切片，属各库自然 API 形态，不是逐字节等价的工作量；查询侧三者均无堆分配。
 
 ## 复现
 
@@ -79,4 +59,5 @@ RUSTFLAGS="-C target-cpu=native" taskset -c 6 cargo bench --bench lpm
 RUSTFLAGS="-C target-cpu=native" taskset -c 6 cargo bench --bench insert
 cargo run --release --bin mem -- fast_radix
 cargo run --release --bin mem -- rart
+cargo run --release --bin mem -- qp_trie
 ```

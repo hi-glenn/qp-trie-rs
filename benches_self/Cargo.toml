@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 fast_radix_trie = "=1.2.0"
 rart = "=0.11.0"
+qp-trie = { path = ".." }
 
 [dev-dependencies]
 criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }

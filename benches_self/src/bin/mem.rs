@@ -1,6 +1,6 @@
 //! 单独进程测量建树后的内存占用。
 //!
-//! 用法：`mem <fast_radix|rart>`
+//! 用法：`mem <fast_radix|rart|qp_trie>`
 //!
 //! 流式逐行读取数据集，反转后立即插入并释放输入行，不驻留全量输入。
 //! 输出峰值（VmHWM）与结束时常驻（VmRSS）内存，以及累计 key 字节数。
@@ -11,6 +11,7 @@ use std::process;
 
 use benches_self::{data_path, reverse_domain_bytes, status_kb};
 use fast_radix_trie::RadixMap;
+use qp_trie::Trie;
 use rart::{AdaptiveRadixTree, VectorKey};
 
 fn report(tree: &str, entries: u64, key_bytes: u64) {
@@ -25,7 +26,7 @@ fn report(tree: &str, entries: u64, key_bytes: u64) {
 
 fn main() {
     let kind = std::env::args().nth(1).unwrap_or_else(|| {
-        eprintln!("用法: mem <fast_radix|rart>");
+        eprintln!("用法: mem <fast_radix|rart|qp_trie>");
         process::exit(2);
     });
 
@@ -78,8 +79,24 @@ fn main() {
             report("rart", len, key_bytes);
             std::hint::black_box(&tree);
         }
+        "qp_trie" => {
+            let mut tree = Trie::<Vec<u8>, u64>::new();
+            while fill_line!() > 0 {
+                let domain = trim_line(&line);
+                if domain.is_empty() {
+                    continue;
+                }
+                let key = reverse_domain_bytes(domain);
+                key_bytes += key.len() as u64;
+                entries += 1;
+                tree.insert(key, entries);
+                // key 的 Vec<u8> 由树接管，随树一起计入内存。
+            }
+            report("qp_trie", entries, key_bytes);
+            std::hint::black_box(&tree);
+        }
         other => {
-            eprintln!("未知实现: {other}，可选 fast_radix | rart");
+            eprintln!("未知实现: {other}，可选 fast_radix | rart | qp_trie");
             process::exit(2);
         }
     }

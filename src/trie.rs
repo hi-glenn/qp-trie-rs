@@ -253,6 +253,36 @@ impl<K: Borrow<[u8]>, V> Trie<K, V> {
         }
     }
 
+    /// Get an immutable reference to the value associated with the longest key in the trie which is
+    /// a prefix of the given key.
+    ///
+    /// Unlike [`longest_common_prefix`](#method.longest_common_prefix), which only reports the
+    /// shared prefix, this returns a value and therefore only considers keys actually stored in
+    /// the trie.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use qp_trie::Trie;
+    /// let mut trie = Trie::new();
+    ///
+    /// trie.insert(b"a".to_vec(), 1);
+    /// trie.insert(b"ab".to_vec(), 2);
+    ///
+    /// assert_eq!(trie.lpm(&b"abc"[..]), Some(&2));
+    /// assert_eq!(trie.lpm(&b"ab"[..]), Some(&2));
+    /// assert_eq!(trie.lpm(&b"a"[..]), Some(&1));
+    /// assert_eq!(trie.lpm(&b"z"[..]), None);
+    /// ```
+    #[inline(always)]
+    pub fn lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        self.root.as_ref().and_then(|root| root.lpm(key))
+    }
+
     /// Count the number of entries in the tree.
     pub fn count(&self) -> usize {
         self.count

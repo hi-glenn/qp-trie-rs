@@ -498,3 +498,64 @@ fn issue_36_node_count_after_clear() {
     trie.clear();
     assert_eq!(0, trie.count());
 }
+
+#[test]
+fn lpm_returns_deepest_value_prefix() {
+    let mut trie = Trie::new();
+
+    trie.insert(b"a".to_vec(), 1);
+    trie.insert(b"ab".to_vec(), 2);
+    trie.insert(b"abc".to_vec(), 3);
+
+    assert_eq!(trie.lpm(&b"abcd"[..]), Some(&3));
+    assert_eq!(trie.lpm(&b"abc"[..]), Some(&3));
+    assert_eq!(trie.lpm(&b"ab"[..]), Some(&2));
+    assert_eq!(trie.lpm(&b"a"[..]), Some(&1));
+    assert_eq!(trie.lpm(&b""[..]), None);
+    assert_eq!(trie.lpm(&b"z"[..]), None);
+
+    let empty: Trie<Vec<u8>, u8> = Trie::new();
+    assert_eq!(empty.lpm(&b"a"[..]), None);
+}
+
+#[test]
+fn lpm_matches_brute_force() {
+    fn strings(max_len: usize) -> Vec<Vec<u8>> {
+        let mut all = vec![Vec::new()];
+        let mut level: Vec<Vec<u8>> = vec![Vec::new()];
+
+        for _ in 0..max_len {
+            level = level
+                .iter()
+                .flat_map(|s| {
+                    let mut left = s.clone();
+                    left.push(b'a');
+                    let mut right = s.clone();
+                    right.push(b'b');
+                    vec![left, right]
+                })
+                .collect();
+            all.extend(level.iter().cloned());
+        }
+
+        all
+    }
+
+    let keys: Vec<Vec<u8>> = strings(5).into_iter().filter(|k| !k.is_empty()).collect();
+    let mut trie = Trie::new();
+
+    for (i, key) in keys.iter().enumerate() {
+        trie.insert(key.clone(), i);
+    }
+
+    for query in strings(7) {
+        let expected = keys
+            .iter()
+            .enumerate()
+            .filter(|&(_, key)| query.starts_with(key.as_slice()))
+            .max_by_key(|&(_, key)| key.len())
+            .map(|(i, _)| i);
+
+        assert_eq!(trie.lpm(&query[..]).copied(), expected, "query {:?}", query);
+    }
+}

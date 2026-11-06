@@ -298,6 +298,54 @@ impl<K: Borrow<[u8]>, V> Node<K, V> {
         }
     }
 
+    // Borrow the value associated with the longest stored key which is a prefix of the given key.
+    //
+    // This walks the trie following the queried key and remembers the deepest branch head which
+    // is a prefix of it, since keys shorter than a branch's choice point live in the branch's head
+    // entry rather than on the path taken by longer queries.
+    #[inline(always)]
+    pub(crate) fn lpm<'a, Q: ?Sized>(&'a self, key: &Q) -> Option<&'a V>
+    where
+        K: Borrow<Q>,
+        Q: Borrow<[u8]>,
+    {
+        let bytes = key.borrow();
+
+        let mut node: &Node<K, V> = self;
+        let mut matched: Option<&'a V> = None;
+
+        while let Node::Branch(ref branch) = *node {
+            let index = branch.index(bytes);
+
+            if branch.entries.contains(index) {
+                if let Some(&Node::Leaf(ref head)) = branch.entries.iter().next() {
+                    let head_key = head.key_slice();
+
+                    if head_key.len() <= bytes.len() && head_key == &bytes[..head_key.len()] {
+                        matched = Some(&head.val);
+                    }
+                }
+            }
+
+            node = branch.entries.get_or_any(index);
+        }
+
+        match *node {
+            Node::Leaf(ref leaf) => {
+                let leaf_key = leaf.key_slice();
+
+                if leaf_key.len() <= bytes.len() && leaf_key == &bytes[..leaf_key.len()] {
+                    Some(&leaf.val)
+                } else {
+                    matched
+                }
+            }
+            // unsafe: a branch always has at least two entries, so the loop above only exits on a
+            // leaf.
+            Node::Branch(..) => unsafe { debug_unreachable!() },
+        }
+    }
+
     // Borrow the "exemplar" for a given key, if it exists. The exemplar is any leaf which exists
     // as a child of the same branch that the given key would be inserted into. This is necessary
     // to decide whether or not a new value for the given key can be inserted into an arbitrary
