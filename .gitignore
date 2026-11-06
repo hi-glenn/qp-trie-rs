@@ -1,3 +1,5 @@
 /target/
 **/*.rs.bk
 Cargo.lock
+benches_self/majestic_million.txt
+benches_self/target/
